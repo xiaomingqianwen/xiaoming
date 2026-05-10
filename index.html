@@ -3276,8 +3276,34 @@ root.render(<App />);
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('✅ 离线模式已启用'))
+      .then(reg => {
+        console.log('✅ 离线模式已启用');
+        // 检测新版本：每 30 分钟检查一次
+        setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+
+        // 新版本下载好了
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // 老版本仍在控制：通知新版本立即接管
+              console.log('🔄 检测到新版本，正在更新…');
+              newWorker.postMessage('SKIP_WAITING');
+            }
+          });
+        });
+      })
       .catch(err => console.warn('SW 注册失败:', err));
+
+    // 新 SW 激活后自动刷新（一次）
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      console.log('🔄 已更新到新版本');
+      window.location.reload();
+    });
   });
 }
 </script>
