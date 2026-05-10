@@ -1,0 +1,3284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="小铭岛">
+<meta name="theme-color" content="#FF8FA3">
+<meta name="description" content="儿童学习闯关 App | 离线可玩 | 适合 4-6 岁">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>小铭奇遇记</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Nunito:wght@400;700;900&display=swap');
+  * { -webkit-tap-highlight-color: transparent; user-select: none; }
+  body {
+    margin: 0;
+    font-family: 'Nunito', 'ZCOOL KuaiLe', system-ui, sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .font-fun { font-family: 'ZCOOL KuaiLe', cursive; }
+
+  /* 浮动动画 */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(2deg); }
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+  @keyframes pulse-soft {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes drift {
+    0% { transform: translateX(0px); }
+    100% { transform: translateX(20px); }
+  }
+  @keyframes pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  @keyframes confetti {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
+  @keyframes star-burst {
+    0% { transform: scale(0) rotate(0); opacity: 1; }
+    100% { transform: scale(2) rotate(180deg); opacity: 0; }
+  }
+  @keyframes feed-fly {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    30% { transform: translate(-50%, -30px) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, 60px) scale(0.3); opacity: 0; }
+  }
+  @keyframes drift-up {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    30% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1); opacity: 0; }
+  }
+  @keyframes count-pop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-float-slow { animation: float-slow 5s ease-in-out infinite; }
+  .animate-wiggle { animation: wiggle 1.5s ease-in-out infinite; }
+  .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+  .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+  .animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .animate-shake { animation: shake 0.4s; }
+
+  .btn-press { transition: all 0.15s; }
+  .btn-press:active { transform: scale(0.92); }
+
+  /* 自定义滚动 */
+  .scroll-area { -webkit-overflow-scrolling: touch; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* 海浪动画 */
+  .wave {
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.3));
+    animation: drift 4s ease-in-out infinite alternate;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ============================================
+// SVG 动物 / 水果图组件库
+// 风格：圆润立体、大眼有表情、统一卡通调性
+// ============================================
+const Critter = ({ id, size = 100, shadow = false }) => {
+  const filter = shadow ? 'brightness(0)' : '';
+  const wrapStyle = { width: size, height: size, filter };
+  return (
+    <div style={wrapStyle} className="inline-block">
+      <svg viewBox="0 0 100 100" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
+        {CRITTER_SVG[id] || <text x="50" y="55" textAnchor="middle" fontSize="60">❓</text>}
+      </svg>
+    </div>
+  );
+};
+
+// 伙伴穿戴饰品的版本
+const CritterWithAccessories = ({ id, size = 100, equipped = [] }) => {
+  const accessoriesByPriority = ['wings', 'hat', 'face', 'neck']; // 渲染顺序
+  const equippedAccs = ACCESSORIES.filter(a => equipped.includes(a.id));
+
+  return (
+    <div style={{ width: size, height: size }} className="inline-block relative">
+      <svg viewBox="0 0 100 100" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
+        {/* 翅膀放在底层 */}
+        {equippedAccs.filter(a => a.slot === 'wings').map(a => <g key={a.id}>{a.svg}</g>)}
+        {/* 主体 */}
+        {CRITTER_SVG[id]}
+        {/* 围巾 */}
+        {equippedAccs.filter(a => a.slot === 'neck').map(a => <g key={a.id}>{a.svg}</g>)}
+        {/* 眼镜（脸上） */}
+        {equippedAccs.filter(a => a.slot === 'face').map(a => <g key={a.id}>{a.svg}</g>)}
+        {/* 帽子放在最上层（注意 SVG 顶部的部分坐标会超出 viewBox） */}
+        {equippedAccs.filter(a => a.slot === 'hat').map(a => <g key={a.id}>{a.svg}</g>)}
+      </svg>
+    </div>
+  );
+};
+
+
+const CRITTER_SVG = {
+  // 🐶 小狗 —— 黄棕柴犬风（更圆润、更像）
+  dog: <g>
+    {/* 身子（前胸） */}
+    <ellipse cx="50" cy="78" rx="26" ry="14" fill="#D4A574"/>
+    {/* 后腿轮廓 */}
+    <ellipse cx="30" cy="80" rx="8" ry="6" fill="#B8915D"/>
+    <ellipse cx="70" cy="80" rx="8" ry="6" fill="#B8915D"/>
+    {/* 头部主体（圆头） */}
+    <circle cx="50" cy="50" r="28" fill="#E5B888"/>
+    {/* 头顶深色花纹 */}
+    <path d="M30 42 Q50 30 70 42 Q72 38 65 30 Q50 22 35 30 Q28 38 30 42 Z" fill="#B8915D"/>
+    {/* 耳朵：垂耳 */}
+    <path d="M28 38 Q22 50 26 62 Q32 60 34 50 Q34 44 30 38 Z" fill="#8B5A2B"/>
+    <path d="M72 38 Q78 50 74 62 Q68 60 66 50 Q66 44 70 38 Z" fill="#8B5A2B"/>
+    {/* 耳朵内 */}
+    <path d="M28 42 Q26 52 28 58 Q30 54 30 48 Z" fill="#5C3A1F" opacity="0.5"/>
+    <path d="M72 42 Q74 52 72 58 Q70 54 70 48 Z" fill="#5C3A1F" opacity="0.5"/>
+    {/* 眼睛周围深色 */}
+    <ellipse cx="40" cy="48" rx="6" ry="5" fill="#B8915D" opacity="0.5"/>
+    <ellipse cx="60" cy="48" rx="6" ry="5" fill="#B8915D" opacity="0.5"/>
+    {/* 眼睛 */}
+    <ellipse cx="40" cy="49" rx="3.5" ry="4" fill="#1A0F08"/>
+    <ellipse cx="60" cy="49" rx="3.5" ry="4" fill="#1A0F08"/>
+    <circle cx="41.2" cy="47.5" r="1.3" fill="#fff"/>
+    <circle cx="61.2" cy="47.5" r="1.3" fill="#fff"/>
+    {/* 嘴部白色区域 */}
+    <ellipse cx="50" cy="63" rx="11" ry="9" fill="#F5DEB3"/>
+    {/* 鼻子 */}
+    <ellipse cx="50" cy="58" rx="3.5" ry="2.8" fill="#1A0F08"/>
+    <ellipse cx="49" cy="57" rx="1.2" ry="0.8" fill="#fff" opacity="0.6"/>
+    {/* 嘴 */}
+    <path d="M50 61 L50 65" stroke="#1A0F08" strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M50 65 Q47 68 44 67" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M50 65 Q53 68 56 67" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 舌头 */}
+    <ellipse cx="50" cy="69" rx="2.5" ry="2" fill="#FF7A8A"/>
+  </g>,
+
+  // 🐱 小猫 —— 灰白虎斑小猫（更像真实小猫）
+  cat: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="78" rx="24" ry="13" fill="#9B9B9B"/>
+    <ellipse cx="50" cy="80" rx="18" ry="8" fill="#FFFFFF"/>
+    {/* 头部主体 */}
+    <circle cx="50" cy="50" r="26" fill="#B5B5B5"/>
+    {/* 头部白色脸颊 */}
+    <ellipse cx="50" cy="58" rx="18" ry="14" fill="#F5F5F5"/>
+    {/* 头顶虎斑 */}
+    <path d="M38 32 Q40 28 42 32" stroke="#5C5C5C" strokeWidth="1.5" fill="none"/>
+    <path d="M50 28 Q52 24 54 28" stroke="#5C5C5C" strokeWidth="1.5" fill="none"/>
+    <path d="M58 32 Q60 28 62 32" stroke="#5C5C5C" strokeWidth="1.5" fill="none"/>
+    {/* 耳朵：尖三角，外深内粉 */}
+    <path d="M30 28 L25 12 L42 25 Z" fill="#B5B5B5"/>
+    <path d="M70 28 L75 12 L58 25 Z" fill="#B5B5B5"/>
+    <path d="M32 26 L29 18 L38 24 Z" fill="#FFB7C5"/>
+    <path d="M68 26 L71 18 L62 24 Z" fill="#FFB7C5"/>
+    {/* 脸侧花纹 */}
+    <path d="M30 50 Q34 48 35 52" stroke="#5C5C5C" strokeWidth="1.5" fill="none"/>
+    <path d="M70 50 Q66 48 65 52" stroke="#5C5C5C" strokeWidth="1.5" fill="none"/>
+    {/* 眼睛：大杏仁眼，绿色 */}
+    <ellipse cx="40" cy="50" rx="5" ry="6.5" fill="#FFFFFF"/>
+    <ellipse cx="60" cy="50" rx="5" ry="6.5" fill="#FFFFFF"/>
+    <ellipse cx="40" cy="50" rx="3.5" ry="6" fill="#7CB342"/>
+    <ellipse cx="60" cy="50" rx="3.5" ry="6" fill="#7CB342"/>
+    {/* 瞳孔（猫眼竖瞳） */}
+    <ellipse cx="40" cy="50" rx="1.2" ry="5.5" fill="#1A0F08"/>
+    <ellipse cx="60" cy="50" rx="1.2" ry="5.5" fill="#1A0F08"/>
+    <circle cx="41" cy="48" r="1.2" fill="#fff"/>
+    <circle cx="61" cy="48" r="1.2" fill="#fff"/>
+    {/* 鼻子：粉色三角 */}
+    <path d="M48 60 L52 60 L50 63 Z" fill="#FF8FA3"/>
+    {/* 嘴 */}
+    <path d="M50 63 L50 65" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    <path d="M50 65 Q47 67 44 66" stroke="#1A0F08" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <path d="M50 65 Q53 67 56 66" stroke="#1A0F08" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    {/* 胡须 */}
+    <line x1="34" y1="59" x2="22" y2="56" stroke="#1A0F08" strokeWidth="0.8"/>
+    <line x1="34" y1="61" x2="22" y2="61" stroke="#1A0F08" strokeWidth="0.8"/>
+    <line x1="34" y1="63" x2="22" y2="66" stroke="#1A0F08" strokeWidth="0.8"/>
+    <line x1="66" y1="59" x2="78" y2="56" stroke="#1A0F08" strokeWidth="0.8"/>
+    <line x1="66" y1="61" x2="78" y2="61" stroke="#1A0F08" strokeWidth="0.8"/>
+    <line x1="66" y1="63" x2="78" y2="66" stroke="#1A0F08" strokeWidth="0.8"/>
+  </g>,
+
+  // 🐰 小兔 —— 长耳白兔，眼睛红润、门牙突出
+  rabbit: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="80" rx="24" ry="12" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="1"/>
+    <ellipse cx="50" cy="83" rx="14" ry="5" fill="#F0F0F0"/>
+    {/* 长耳朵 —— 直立，带粉色内耳 */}
+    <ellipse cx="38" cy="22" rx="6" ry="18" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="1"/>
+    <ellipse cx="38" cy="24" rx="3" ry="13" fill="#FFB7D5"/>
+    <ellipse cx="38" cy="22" rx="1.5" ry="9" fill="#FF8FB1" opacity="0.5"/>
+    <ellipse cx="62" cy="22" rx="6" ry="18" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="1"/>
+    <ellipse cx="62" cy="24" rx="3" ry="13" fill="#FFB7D5"/>
+    <ellipse cx="62" cy="22" rx="1.5" ry="9" fill="#FF8FB1" opacity="0.5"/>
+    {/* 头 */}
+    <circle cx="50" cy="55" r="24" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="1"/>
+    {/* 头顶白色 highlight */}
+    <ellipse cx="46" cy="44" rx="10" ry="6" fill="#FAFAFA" opacity="0.7"/>
+    {/* 红润眼睛（兔子的招牌） */}
+    <ellipse cx="40" cy="52" rx="4.5" ry="5" fill="#FFFFFF"/>
+    <ellipse cx="60" cy="52" rx="4.5" ry="5" fill="#FFFFFF"/>
+    <circle cx="40" cy="53" r="3.5" fill="#D63A4A"/>
+    <circle cx="60" cy="53" r="3.5" fill="#D63A4A"/>
+    <circle cx="40" cy="53" r="2" fill="#1A0F08"/>
+    <circle cx="60" cy="53" r="2" fill="#1A0F08"/>
+    <circle cx="41" cy="51.5" r="1" fill="#fff"/>
+    <circle cx="61" cy="51.5" r="1" fill="#fff"/>
+    {/* 鼻子和嘴 */}
+    <path d="M48 62 L52 62 L50 65 Z" fill="#FFB7D5"/>
+    <path d="M50 65 L50 67" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    <path d="M50 67 Q47 70 45 68" stroke="#1A0F08" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <path d="M50 67 Q53 70 55 68" stroke="#1A0F08" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    {/* 大门牙（兔子标志） */}
+    <rect x="47" y="69" width="2.8" height="5" fill="#FFFFFF" stroke="#CCC" strokeWidth="0.5" rx="0.5"/>
+    <rect x="50.2" y="69" width="2.8" height="5" fill="#FFFFFF" stroke="#CCC" strokeWidth="0.5" rx="0.5"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="32" cy="62" rx="3.5" ry="2.5" fill="#FFB7D5" opacity="0.7"/>
+    <ellipse cx="68" cy="62" rx="3.5" ry="2.5" fill="#FFB7D5" opacity="0.7"/>
+    {/* 胡须 */}
+    <line x1="35" y1="61" x2="25" y2="59" stroke="#999" strokeWidth="0.6"/>
+    <line x1="35" y1="63" x2="25" y2="65" stroke="#999" strokeWidth="0.6"/>
+    <line x1="65" y1="61" x2="75" y2="59" stroke="#999" strokeWidth="0.6"/>
+    <line x1="65" y1="63" x2="75" y2="65" stroke="#999" strokeWidth="0.6"/>
+  </g>,
+
+  // 🐻 小熊 —— 棕熊，圆耳朵、深色眼周
+  bear: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="80" rx="26" ry="13" fill="#7A5230"/>
+    <ellipse cx="50" cy="83" rx="18" ry="6" fill="#A87B4D"/>
+    {/* 圆耳朵 */}
+    <circle cx="28" cy="30" r="10" fill="#5C3D1F"/>
+    <circle cx="72" cy="30" r="10" fill="#5C3D1F"/>
+    <circle cx="28" cy="30" r="6" fill="#C49A75"/>
+    <circle cx="72" cy="30" r="6" fill="#C49A75"/>
+    {/* 头 */}
+    <circle cx="50" cy="52" r="28" fill="#8B5A2B"/>
+    {/* 头顶高光 */}
+    <ellipse cx="44" cy="38" rx="12" ry="6" fill="#A87B4D" opacity="0.6"/>
+    {/* 眼周深色 */}
+    <ellipse cx="40" cy="48" rx="5" ry="5" fill="#5C3D1F" opacity="0.7"/>
+    <ellipse cx="60" cy="48" rx="5" ry="5" fill="#5C3D1F" opacity="0.7"/>
+    {/* 眼睛 */}
+    <circle cx="40" cy="48" r="3" fill="#1A0F08"/>
+    <circle cx="60" cy="48" r="3" fill="#1A0F08"/>
+    <circle cx="41" cy="46.5" r="1" fill="#fff"/>
+    <circle cx="61" cy="46.5" r="1" fill="#fff"/>
+    {/* 嘴部突出（米色） */}
+    <ellipse cx="50" cy="63" rx="13" ry="11" fill="#E8C49A"/>
+    {/* 鼻子 */}
+    <ellipse cx="50" cy="58" rx="4" ry="3" fill="#1A0F08"/>
+    <ellipse cx="49" cy="57" rx="1.2" ry="0.8" fill="#fff" opacity="0.6"/>
+    {/* 嘴 */}
+    <path d="M50 61 L50 65" stroke="#1A0F08" strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M50 65 Q47 69 44 68" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M50 65 Q53 69 56 68" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="30" cy="58" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
+    <ellipse cx="70" cy="58" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
+  </g>,
+
+  // 🦁 狮子 —— 鬃毛王者，金黄脸、深棕鬃毛
+  lion: <g>
+    {/* 鬃毛外圈：12 个椭圆环绕 */}
+    {Array.from({ length: 12 }).map((_, idx) => {
+      const a = idx * 30;
+      const r = 32;
+      const cx = 50 + r * Math.cos(a * Math.PI / 180);
+      const cy = 52 + r * Math.sin(a * Math.PI / 180);
+      return (
+        <ellipse key={idx} cx={cx} cy={cy} rx="11" ry="8" fill="#7A4513"
+          transform={`rotate(${a + 90} ${cx} ${cy})`}/>
+      );
+    })}
+    {/* 内圈鬃毛 */}
+    {Array.from({ length: 8 }).map((_, idx) => {
+      const a = idx * 45 + 22;
+      const r = 26;
+      const cx = 50 + r * Math.cos(a * Math.PI / 180);
+      const cy = 52 + r * Math.sin(a * Math.PI / 180);
+      return (
+        <ellipse key={`b${idx}`} cx={cx} cy={cy} rx="9" ry="7" fill="#A86420"
+          transform={`rotate(${a + 90} ${cx} ${cy})`}/>
+      );
+    })}
+    {/* 身子 */}
+    <ellipse cx="50" cy="84" rx="20" ry="9" fill="#E8A857"/>
+    {/* 头 */}
+    <circle cx="50" cy="52" r="22" fill="#F5C572"/>
+    {/* 耳朵尖 */}
+    <ellipse cx="34" cy="36" rx="4" ry="5" fill="#7A4513"/>
+    <ellipse cx="66" cy="36" rx="4" ry="5" fill="#7A4513"/>
+    <ellipse cx="34" cy="37" rx="2" ry="3" fill="#FFB7B7" opacity="0.6"/>
+    <ellipse cx="66" cy="37" rx="2" ry="3" fill="#FFB7B7" opacity="0.6"/>
+    {/* 眼睛 */}
+    <ellipse cx="42" cy="48" rx="3.5" ry="4" fill="#1A0F08"/>
+    <ellipse cx="58" cy="48" rx="3.5" ry="4" fill="#1A0F08"/>
+    <circle cx="43" cy="46.5" r="1.2" fill="#fff"/>
+    <circle cx="59" cy="46.5" r="1.2" fill="#fff"/>
+    {/* 嘴部突出（白色） */}
+    <ellipse cx="50" cy="62" rx="14" ry="11" fill="#FFE4B5"/>
+    {/* 鼻子（黑色 W 形） */}
+    <path d="M44 56 Q50 60 56 56 Q53 58 50 58 Q47 58 44 56 Z" fill="#1A0F08"/>
+    {/* 嘴 */}
+    <path d="M50 60 L50 64" stroke="#1A0F08" strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M50 64 Q47 68 44 67" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M50 64 Q53 68 56 67" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 胡须斑点 */}
+    <circle cx="44" cy="62" r="0.6" fill="#1A0F08"/>
+    <circle cx="42" cy="65" r="0.6" fill="#1A0F08"/>
+    <circle cx="56" cy="62" r="0.6" fill="#1A0F08"/>
+    <circle cx="58" cy="65" r="0.6" fill="#1A0F08"/>
+  </g>,
+
+  // 🐵 猴子 —— 棕色身、肉色脸、大耳朵
+  monkey: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="80" rx="22" ry="11" fill="#6B4520"/>
+    {/* 大耳朵 */}
+    <ellipse cx="22" cy="48" rx="9" ry="11" fill="#6B4520"/>
+    <ellipse cx="78" cy="48" rx="9" ry="11" fill="#6B4520"/>
+    <ellipse cx="22" cy="48" rx="5" ry="7" fill="#E8B5A0"/>
+    <ellipse cx="78" cy="48" rx="5" ry="7" fill="#E8B5A0"/>
+    {/* 头 */}
+    <circle cx="50" cy="50" r="24" fill="#7A5230"/>
+    {/* 头顶刘海 */}
+    <path d="M30 38 Q35 28 50 28 Q65 28 70 38 Q60 32 50 32 Q40 32 30 38 Z" fill="#5C3D1F"/>
+    {/* 脸盘（肉色） */}
+    <ellipse cx="50" cy="56" rx="18" ry="16" fill="#FFE4C4"/>
+    {/* 眉骨阴影 */}
+    <path d="M36 44 Q42 41 46 44" stroke="#7A5230" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <path d="M54 44 Q58 41 64 44" stroke="#7A5230" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    {/* 眼睛 */}
+    <ellipse cx="42" cy="48" rx="3" ry="3.5" fill="#1A0F08"/>
+    <ellipse cx="58" cy="48" rx="3" ry="3.5" fill="#1A0F08"/>
+    <circle cx="43" cy="46.5" r="1" fill="#fff"/>
+    <circle cx="59" cy="46.5" r="1" fill="#fff"/>
+    {/* 鼻孔 */}
+    <ellipse cx="46" cy="59" rx="1.2" ry="2" fill="#1A0F08" opacity="0.7"/>
+    <ellipse cx="54" cy="59" rx="1.2" ry="2" fill="#1A0F08" opacity="0.7"/>
+    {/* 大笑嘴 */}
+    <path d="M40 65 Q50 72 60 65 Q55 68 50 68 Q45 68 40 65 Z" fill="#1A0F08"/>
+    <path d="M42 66 Q50 70 58 66" stroke="#FFFFFF" strokeWidth="0.6" fill="none"/>
+  </g>,
+
+  // 🐘 大象 —— 灰蓝色，长鼻子、扇耳朵
+  elephant: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="78" rx="28" ry="13" fill="#7A8FA8"/>
+    {/* 大耳朵（扇形）*/}
+    <path d="M20 52 Q8 45 8 65 Q12 78 25 75 Q26 65 26 55 Z" fill="#9BA8B8"/>
+    <path d="M14 60 Q14 70 20 73" stroke="#6B7C95" strokeWidth="1" fill="none"/>
+    <path d="M80 52 Q92 45 92 65 Q88 78 75 75 Q74 65 74 55 Z" fill="#9BA8B8"/>
+    <path d="M86 60 Q86 70 80 73" stroke="#6B7C95" strokeWidth="1" fill="none"/>
+    {/* 头 */}
+    <ellipse cx="50" cy="55" rx="26" ry="24" fill="#A8B5C7"/>
+    {/* 长鼻子（弯曲的） */}
+    <path d="M50 65 Q44 75 42 85 Q44 90 50 88 Q52 84 51 78 Q52 72 53 68 Z" fill="#A8B5C7"/>
+    <path d="M44 80 Q46 84 49 84" stroke="#7A8FA8" strokeWidth="1" fill="none"/>
+    <path d="M44 75 Q47 77 50 76" stroke="#7A8FA8" strokeWidth="1" fill="none"/>
+    {/* 鼻孔 */}
+    <circle cx="46" cy="86" r="1" fill="#1A0F08"/>
+    <circle cx="48.5" cy="87" r="1" fill="#1A0F08"/>
+    {/* 白色獠牙 */}
+    <path d="M42 70 Q40 75 41 80 Q43 80 44 76 Z" fill="#FFFFFF"/>
+    <path d="M58 70 Q60 75 59 80 Q57 80 56 76 Z" fill="#FFFFFF"/>
+    {/* 头顶高光 */}
+    <ellipse cx="44" cy="40" rx="10" ry="6" fill="#C5D0DD" opacity="0.6"/>
+    {/* 眼睛 */}
+    <circle cx="40" cy="50" r="3" fill="#1A0F08"/>
+    <circle cx="60" cy="50" r="3" fill="#1A0F08"/>
+    <circle cx="41" cy="48.5" r="1" fill="#fff"/>
+    <circle cx="61" cy="48.5" r="1" fill="#fff"/>
+    {/* 长睫毛 */}
+    <line x1="38" y1="46" x2="36" y2="44" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="42" y1="46" x2="42" y2="43" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="58" y1="46" x2="58" y2="43" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="62" y1="46" x2="64" y2="44" stroke="#1A0F08" strokeWidth="1" strokeLinecap="round"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="34" cy="58" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
+    <ellipse cx="66" cy="58" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
+  </g>,
+
+  // 🐼 熊猫 —— 黑白经典款，大黑眼圈
+  panda: <g>
+    {/* 身子 */}
+    <ellipse cx="50" cy="80" rx="26" ry="12" fill="#FFFFFF" stroke="#E0E0E0" strokeWidth="1"/>
+    <ellipse cx="50" cy="84" rx="20" ry="6" fill="#1A0F08"/>
+    {/* 黑色圆耳朵 */}
+    <circle cx="28" cy="28" r="11" fill="#1A0F08"/>
+    <circle cx="72" cy="28" r="11" fill="#1A0F08"/>
+    <circle cx="28" cy="28" r="5" fill="#3A2A1F"/>
+    <circle cx="72" cy="28" r="5" fill="#3A2A1F"/>
+    {/* 头：白色圆 */}
+    <circle cx="50" cy="52" r="26" fill="#FFFFFF"/>
+    {/* 头顶高光 */}
+    <ellipse cx="44" cy="38" rx="10" ry="5" fill="#FAFAFA" opacity="0.7"/>
+    {/* 大黑眼圈（熊猫招牌） */}
+    <ellipse cx="38" cy="50" rx="7" ry="9" fill="#1A0F08" transform="rotate(-15 38 50)"/>
+    <ellipse cx="62" cy="50" rx="7" ry="9" fill="#1A0F08" transform="rotate(15 62 50)"/>
+    {/* 眼睛 */}
+    <ellipse cx="38" cy="51" rx="3" ry="3.5" fill="#FFFFFF"/>
+    <ellipse cx="62" cy="51" rx="3" ry="3.5" fill="#FFFFFF"/>
+    <circle cx="38" cy="52" r="2.2" fill="#1A0F08"/>
+    <circle cx="62" cy="52" r="2.2" fill="#1A0F08"/>
+    <circle cx="38.7" cy="50.5" r="0.9" fill="#fff"/>
+    <circle cx="62.7" cy="50.5" r="0.9" fill="#fff"/>
+    {/* 鼻子 */}
+    <ellipse cx="50" cy="62" rx="3" ry="2.5" fill="#1A0F08"/>
+    {/* 嘴 */}
+    <path d="M50 64 L50 67" stroke="#1A0F08" strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M50 67 Q47 70 44 69" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    <path d="M50 67 Q53 70 56 69" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="32" cy="60" rx="3" ry="2" fill="#FFB7B7" opacity="0.6"/>
+    <ellipse cx="68" cy="60" rx="3" ry="2" fill="#FFB7B7" opacity="0.6"/>
+  </g>,
+
+  // 🍎 苹果
+  apple: <g>
+    <path d="M50 30 Q50 22 55 22 Q60 22 60 28 Q60 25 56 26" fill="none" stroke="#5C3D1F" strokeWidth="2" strokeLinecap="round"/>
+    <ellipse cx="58" cy="22" rx="6" ry="3" fill="#5DAA3A" transform="rotate(20 58 22)"/>
+    <circle cx="50" cy="58" r="30" fill="#E63946"/>
+    <ellipse cx="40" cy="48" rx="8" ry="14" fill="#FF6B6B" opacity="0.6"/>
+    <circle cx="42" cy="50" r="3" fill="#FFB7B7" opacity="0.8"/>
+    <circle cx="42" cy="56" r="3" fill="#2C1810"/><circle cx="43" cy="54.5" r="1" fill="#fff"/>
+    <circle cx="58" cy="56" r="3" fill="#2C1810"/><circle cx="59" cy="54.5" r="1" fill="#fff"/>
+    <path d="M44 64 Q50 68 56 64" stroke="#2C1810" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🍌 香蕉
+  banana: <g>
+    <path d="M25 40 Q20 60 30 80 Q50 90 75 75 Q85 65 80 55 Q70 70 50 75 Q35 75 32 60 Q30 50 30 40 Z" fill="#FFD93D"/>
+    <path d="M25 40 Q22 50 28 65" stroke="#E8B82C" strokeWidth="2" fill="none"/>
+    <ellipse cx="22" cy="38" rx="4" ry="3" fill="#5C3D1F"/>
+    <ellipse cx="78" cy="73" rx="4" ry="3" fill="#5C3D1F"/>
+    <circle cx="48" cy="65" r="2.5" fill="#2C1810"/><circle cx="49" cy="64" r="0.8" fill="#fff"/>
+    <circle cx="58" cy="65" r="2.5" fill="#2C1810"/><circle cx="59" cy="64" r="0.8" fill="#fff"/>
+    <path d="M50 70 Q53 73 56 71" stroke="#2C1810" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🍉 西瓜
+  watermelon: <g>
+    <path d="M15 55 Q15 30 50 25 Q85 30 85 55 Z" fill="#2D5F3F"/>
+    <path d="M22 55 Q22 35 50 31 Q78 35 78 55 Z" fill="#A8D88A"/>
+    <path d="M28 55 Q28 40 50 37 Q72 40 72 55 Z" fill="#FF6B6B"/>
+    <ellipse cx="38" cy="48" rx="2" ry="3" fill="#2C1810"/>
+    <ellipse cx="50" cy="45" rx="2" ry="3" fill="#2C1810"/>
+    <ellipse cx="62" cy="48" rx="2" ry="3" fill="#2C1810"/>
+    <ellipse cx="44" cy="52" rx="2" ry="3" fill="#2C1810"/>
+    <ellipse cx="56" cy="52" rx="2" ry="3" fill="#2C1810"/>
+    <circle cx="42" cy="42" r="2" fill="#2C1810"/><circle cx="42.5" cy="41" r="0.6" fill="#fff"/>
+    <circle cx="58" cy="42" r="2" fill="#2C1810"/><circle cx="58.5" cy="41" r="0.6" fill="#fff"/>
+    <path d="M46 48 Q50 50 54 48" stroke="#2C1810" strokeWidth="1" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🍇 葡萄
+  grape: <g>
+    <path d="M50 22 Q55 22 56 28" fill="none" stroke="#5C3D1F" strokeWidth="2" strokeLinecap="round"/>
+    <ellipse cx="58" cy="24" rx="5" ry="3" fill="#5DAA3A"/>
+    {[
+      [40,40],[50,40],[60,40],
+      [35,50],[45,50],[55,50],[65,50],
+      [40,60],[50,60],[60,60],
+      [45,70],[55,70],
+      [50,78]
+    ].map(([x,y],i) => (
+      <circle key={i} cx={x} cy={y} r="7" fill="#7C4DBE"/>
+    ))}
+    {[[40,40],[50,40],[60,40],[35,50],[45,50],[55,50],[65,50],[40,60],[50,60],[60,60],[45,70],[55,70],[50,78]].map(([x,y],i) => (
+      <circle key={`h${i}`} cx={x-1.5} cy={y-1.5} r="2" fill="#B59CE6" opacity="0.7"/>
+    ))}
+    <circle cx="46" cy="50" r="2" fill="#2C1810"/><circle cx="46.5" cy="49.3" r="0.6" fill="#fff"/>
+    <circle cx="54" cy="50" r="2" fill="#2C1810"/><circle cx="54.5" cy="49.3" r="0.6" fill="#fff"/>
+    <path d="M48 54 Q50 56 52 54" stroke="#2C1810" strokeWidth="1" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🍓 草莓
+  strawberry: <g>
+    <path d="M40 28 Q45 24 50 28 Q55 24 60 28 L58 36 L42 36 Z" fill="#5DAA3A"/>
+    <path d="M50 32 L50 25" stroke="#5DAA3A" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M30 38 Q30 35 40 35 L60 35 Q70 35 70 38 Q70 70 50 85 Q30 70 30 38 Z" fill="#FF4757"/>
+    {[[38,48],[50,46],[62,48],[42,58],[58,58],[40,68],[50,66],[60,68],[46,76],[54,76]].map(([x,y],i) => (
+      <ellipse key={i} cx={x} cy={y} rx="1.2" ry="2" fill="#FFD93D"/>
+    ))}
+    <circle cx="44" cy="52" r="2.5" fill="#2C1810"/><circle cx="44.5" cy="51" r="0.7" fill="#fff"/>
+    <circle cx="56" cy="52" r="2.5" fill="#2C1810"/><circle cx="56.5" cy="51" r="0.7" fill="#fff"/>
+    <path d="M46 58 Q50 61 54 58" stroke="#2C1810" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🍊 橙子
+  orange: <g>
+    <path d="M48 22 Q52 18 56 22" stroke="#5C3D1F" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <ellipse cx="55" cy="22" rx="5" ry="3" fill="#5DAA3A"/>
+    <circle cx="50" cy="58" r="30" fill="#FF8C42"/>
+    <circle cx="50" cy="58" r="30" fill="none" stroke="#E67323" strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
+    <ellipse cx="38" cy="48" rx="6" ry="10" fill="#FFA763" opacity="0.6"/>
+    <circle cx="42" cy="56" r="3" fill="#2C1810"/><circle cx="43" cy="54.5" r="1" fill="#fff"/>
+    <circle cx="58" cy="56" r="3" fill="#2C1810"/><circle cx="59" cy="54.5" r="1" fill="#fff"/>
+    <path d="M44 64 Q50 68 56 64" stroke="#2C1810" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // ═════════════ 交通工具 ═════════════
+
+  // 🚗 小汽车 —— 红色卡通车
+  car: <g>
+    {/* 车顶 */}
+    <path d="M28 50 L36 38 L64 38 L72 50 Z" fill="#E63946"/>
+    <rect x="36" y="42" width="11" height="8" fill="#A8D8F5"/>
+    <rect x="53" y="42" width="11" height="8" fill="#A8D8F5"/>
+    {/* 车身 */}
+    <rect x="20" y="50" width="60" height="20" rx="6" fill="#E63946"/>
+    {/* 车灯 */}
+    <circle cx="76" cy="58" r="3" fill="#FFD93D"/>
+    <circle cx="24" cy="58" r="3" fill="#FFE4B5"/>
+    {/* 车窗高光 */}
+    <path d="M38 43 L44 43 L44 49 L38 49 Z" fill="#FFFFFF" opacity="0.4"/>
+    {/* 车轮 */}
+    <circle cx="32" cy="72" r="8" fill="#1A0F08"/>
+    <circle cx="68" cy="72" r="8" fill="#1A0F08"/>
+    <circle cx="32" cy="72" r="3" fill="#999"/>
+    <circle cx="68" cy="72" r="3" fill="#999"/>
+    {/* 笑脸（正面） */}
+    <circle cx="38" cy="58" r="2" fill="#1A0F08"/>
+    <circle cx="62" cy="58" r="2" fill="#1A0F08"/>
+    <path d="M44 64 Q50 67 56 64" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🚂 小火车 —— 蓝色蒸汽火车
+  train: <g>
+    {/* 烟囱 */}
+    <rect x="22" y="30" width="10" height="14" fill="#1A0F08"/>
+    <rect x="20" y="28" width="14" height="4" fill="#1A0F08"/>
+    {/* 烟雾 */}
+    <circle cx="20" cy="22" r="5" fill="#E0E0E0" opacity="0.8"/>
+    <circle cx="14" cy="18" r="4" fill="#E0E0E0" opacity="0.6"/>
+    {/* 车头主体 */}
+    <rect x="15" y="42" width="40" height="30" rx="4" fill="#3A8DDE"/>
+    {/* 车窗 */}
+    <rect x="20" y="48" width="10" height="10" rx="2" fill="#A8D8F5"/>
+    <rect x="35" y="48" width="15" height="10" rx="2" fill="#A8D8F5"/>
+    {/* 车厢 */}
+    <rect x="55" y="48" width="30" height="24" rx="4" fill="#E63946"/>
+    <rect x="60" y="52" width="8" height="8" fill="#A8D8F5"/>
+    <rect x="72" y="52" width="8" height="8" fill="#A8D8F5"/>
+    {/* 连接 */}
+    <rect x="52" y="60" width="6" height="3" fill="#1A0F08"/>
+    {/* 车轮 */}
+    <circle cx="22" cy="76" r="6" fill="#1A0F08"/>
+    <circle cx="40" cy="76" r="6" fill="#1A0F08"/>
+    <circle cx="60" cy="76" r="5" fill="#1A0F08"/>
+    <circle cx="78" cy="76" r="5" fill="#1A0F08"/>
+    {/* 笑脸 */}
+    <circle cx="42" cy="62" r="2" fill="#1A0F08"/>
+    <path d="M40 68 Q43 70 46 68" stroke="#1A0F08" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // ✈️ 飞机 —— 白蓝小飞机
+  plane: <g>
+    {/* 机身 */}
+    <ellipse cx="50" cy="50" rx="35" ry="9" fill="#FFFFFF" stroke="#A8D8F5" strokeWidth="1"/>
+    {/* 机翼 */}
+    <path d="M30 48 L20 60 L40 52 Z" fill="#3A8DDE"/>
+    <path d="M30 52 L20 64 L40 56 Z" fill="#2A6FB0"/>
+    {/* 尾翼 */}
+    <path d="M82 45 L92 38 L88 50 Z" fill="#3A8DDE"/>
+    <path d="M82 55 L92 62 L88 50 Z" fill="#2A6FB0"/>
+    {/* 机头 */}
+    <ellipse cx="14" cy="50" rx="6" ry="6" fill="#FFB562"/>
+    {/* 舷窗 */}
+    <circle cx="38" cy="48" r="2.5" fill="#A8D8F5"/>
+    <circle cx="48" cy="48" r="2.5" fill="#A8D8F5"/>
+    <circle cx="58" cy="48" r="2.5" fill="#A8D8F5"/>
+    <circle cx="68" cy="48" r="2.5" fill="#A8D8F5"/>
+    {/* 螺旋桨/笑脸 */}
+    <circle cx="14" cy="50" r="2" fill="#1A0F08"/>
+    <line x1="14" y1="44" x2="14" y2="56" stroke="#1A0F08" strokeWidth="1" opacity="0.5"/>
+    {/* 装饰条 */}
+    <line x1="20" y1="50" x2="80" y2="50" stroke="#3A8DDE" strokeWidth="0.5" opacity="0.4"/>
+  </g>,
+
+  // 🚢 小船 —— 红蓝色帆船
+  boat: <g>
+    {/* 海浪背景 */}
+    <path d="M5 70 Q15 65 25 70 Q35 65 45 70 Q55 65 65 70 Q75 65 85 70 Q95 65 95 80 L5 80 Z" fill="#7DC4F5"/>
+    {/* 船身 */}
+    <path d="M15 60 L85 60 L75 78 L25 78 Z" fill="#E63946"/>
+    {/* 装饰条 */}
+    <line x1="20" y1="68" x2="80" y2="68" stroke="#FFFFFF" strokeWidth="2"/>
+    {/* 桅杆 */}
+    <rect x="48" y="20" width="4" height="40" fill="#8B5A2B"/>
+    {/* 帆 */}
+    <path d="M52 22 L70 50 L52 50 Z" fill="#FFFFFF"/>
+    <path d="M48 22 L30 50 L48 50 Z" fill="#FFD93D"/>
+    {/* 旗帜 */}
+    <path d="M50 18 L58 22 L50 26 Z" fill="#FF8FA3"/>
+    {/* 圆窗 */}
+    <circle cx="35" cy="68" r="2.5" fill="#A8D8F5"/>
+    <circle cx="50" cy="68" r="2.5" fill="#A8D8F5"/>
+    <circle cx="65" cy="68" r="2.5" fill="#A8D8F5"/>
+  </g>,
+
+  // 🚲 自行车 —— 蓝色单车
+  bike: <g>
+    {/* 后轮 */}
+    <circle cx="25" cy="65" r="15" fill="none" stroke="#1A0F08" strokeWidth="3"/>
+    <circle cx="25" cy="65" r="3" fill="#1A0F08"/>
+    {/* 辐条 */}
+    {[0, 45, 90, 135].map(a => (
+      <line key={a} x1={25 + 13*Math.cos(a*Math.PI/180)} y1={65 + 13*Math.sin(a*Math.PI/180)}
+        x2={25 - 13*Math.cos(a*Math.PI/180)} y2={65 - 13*Math.sin(a*Math.PI/180)}
+        stroke="#999" strokeWidth="0.8"/>
+    ))}
+    {/* 前轮 */}
+    <circle cx="75" cy="65" r="15" fill="none" stroke="#1A0F08" strokeWidth="3"/>
+    <circle cx="75" cy="65" r="3" fill="#1A0F08"/>
+    {[0, 45, 90, 135].map(a => (
+      <line key={`f${a}`} x1={75 + 13*Math.cos(a*Math.PI/180)} y1={65 + 13*Math.sin(a*Math.PI/180)}
+        x2={75 - 13*Math.cos(a*Math.PI/180)} y2={65 - 13*Math.sin(a*Math.PI/180)}
+        stroke="#999" strokeWidth="0.8"/>
+    ))}
+    {/* 车架 */}
+    <line x1="25" y1="65" x2="50" y2="35" stroke="#3A8DDE" strokeWidth="4"/>
+    <line x1="50" y1="35" x2="75" y2="65" stroke="#3A8DDE" strokeWidth="4"/>
+    <line x1="25" y1="65" x2="55" y2="65" stroke="#3A8DDE" strokeWidth="4"/>
+    <line x1="55" y1="65" x2="50" y2="35" stroke="#3A8DDE" strokeWidth="4"/>
+    {/* 车把 */}
+    <line x1="50" y1="35" x2="60" y2="28" stroke="#1A0F08" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="60" y1="28" x2="68" y2="28" stroke="#1A0F08" strokeWidth="3" strokeLinecap="round"/>
+    {/* 座垫 */}
+    <ellipse cx="48" cy="32" rx="5" ry="2" fill="#1A0F08"/>
+  </g>,
+
+  // 🚌 公交车 —— 黄色巴士
+  bus: <g>
+    {/* 车身 */}
+    <rect x="12" y="38" width="76" height="36" rx="6" fill="#FFD93D"/>
+    {/* 顶部弧线 */}
+    <path d="M12 44 Q12 38 18 38 L82 38 Q88 38 88 44" fill="#FFE066"/>
+    {/* 窗户 */}
+    <rect x="18" y="44" width="14" height="10" rx="2" fill="#A8D8F5"/>
+    <rect x="35" y="44" width="14" height="10" rx="2" fill="#A8D8F5"/>
+    <rect x="52" y="44" width="14" height="10" rx="2" fill="#A8D8F5"/>
+    <rect x="69" y="44" width="13" height="10" rx="2" fill="#A8D8F5"/>
+    {/* 车门 */}
+    <rect x="18" y="58" width="10" height="14" fill="#FFE066"/>
+    <line x1="23" y1="58" x2="23" y2="72" stroke="#1A0F08" strokeWidth="1"/>
+    {/* 车灯 */}
+    <circle cx="84" cy="60" r="3" fill="#FFFFFF"/>
+    {/* 车牌 */}
+    <rect x="46" y="62" width="20" height="5" rx="1" fill="#FFFFFF"/>
+    <text x="56" y="66" textAnchor="middle" fontSize="4" fill="#1A0F08" fontWeight="bold">BUS</text>
+    {/* 车轮 */}
+    <circle cx="28" cy="76" r="7" fill="#1A0F08"/>
+    <circle cx="72" cy="76" r="7" fill="#1A0F08"/>
+    <circle cx="28" cy="76" r="3" fill="#999"/>
+    <circle cx="72" cy="76" r="3" fill="#999"/>
+  </g>,
+
+  // 🚒 消防车 —— 红色救援车
+  fire_truck: <g>
+    {/* 车身后部 */}
+    <rect x="40" y="42" width="50" height="32" rx="3" fill="#E63946"/>
+    {/* 车头驾驶室 */}
+    <path d="M10 50 L20 38 L42 38 L42 74 L10 74 Z" fill="#E63946"/>
+    {/* 驾驶室窗 */}
+    <rect x="22" y="42" width="18" height="10" rx="1" fill="#A8D8F5"/>
+    {/* 后部装备 */}
+    <rect x="44" y="48" width="10" height="20" fill="#FFFFFF" stroke="#1A0F08" strokeWidth="0.5"/>
+    <rect x="56" y="48" width="10" height="20" fill="#FFFFFF" stroke="#1A0F08" strokeWidth="0.5"/>
+    <rect x="68" y="48" width="10" height="20" fill="#FFFFFF" stroke="#1A0F08" strokeWidth="0.5"/>
+    {/* 警灯 */}
+    <rect x="20" y="32" width="20" height="6" rx="2" fill="#1A0F08"/>
+    <circle cx="24" cy="32" r="2.5" fill="#FF6B6B"/>
+    <circle cx="36" cy="32" r="2.5" fill="#3A8DDE"/>
+    {/* 梯子 */}
+    <line x1="48" y1="44" x2="86" y2="44" stroke="#FFD93D" strokeWidth="2"/>
+    <line x1="48" y1="44" x2="86" y2="44" stroke="#1A0F08" strokeWidth="0.5"/>
+    {[52, 58, 64, 70, 76, 82].map(x => (
+      <line key={x} x1={x} y1="42" x2={x} y2="46" stroke="#FFD93D" strokeWidth="1.5"/>
+    ))}
+    {/* 车轮 */}
+    <circle cx="22" cy="76" r="6" fill="#1A0F08"/>
+    <circle cx="60" cy="76" r="6" fill="#1A0F08"/>
+    <circle cx="80" cy="76" r="6" fill="#1A0F08"/>
+  </g>,
+
+  // 🚓 警车 —— 蓝白警车
+  police_car: <g>
+    {/* 车顶 */}
+    <path d="M28 50 L36 36 L64 36 L72 50 Z" fill="#FFFFFF"/>
+    <rect x="36" y="40" width="11" height="9" fill="#A8D8F5"/>
+    <rect x="53" y="40" width="11" height="9" fill="#A8D8F5"/>
+    {/* 车身 */}
+    <rect x="20" y="50" width="60" height="20" rx="6" fill="#FFFFFF"/>
+    {/* 车身侧条 */}
+    <rect x="20" y="58" width="60" height="6" fill="#1A1A1A"/>
+    {/* POLICE 字样 */}
+    <rect x="36" y="59" width="28" height="4" fill="#3A8DDE"/>
+    {/* 警灯顶 */}
+    <rect x="42" y="32" width="16" height="5" rx="1" fill="#1A0F08"/>
+    <rect x="44" y="33" width="6" height="3" fill="#FF6B6B"/>
+    <rect x="50" y="33" width="6" height="3" fill="#3A8DDE"/>
+    {/* 车灯 */}
+    <circle cx="76" cy="58" r="2" fill="#FFD93D"/>
+    <circle cx="24" cy="58" r="2" fill="#FFE4B5"/>
+    {/* 车轮 */}
+    <circle cx="32" cy="72" r="8" fill="#1A0F08"/>
+    <circle cx="68" cy="72" r="8" fill="#1A0F08"/>
+    <circle cx="32" cy="72" r="3" fill="#999"/>
+    <circle cx="68" cy="72" r="3" fill="#999"/>
+  </g>,
+};
+
+
+const ISLANDS = [
+  {
+    id: 'animals',
+    name: '动物岛',
+    emoji: '🐾',
+    color: 'pink',
+    bgFrom: '#FFB7D5',
+    bgTo: '#FF8FA3',
+    unlocked: true,
+    description: '认识可爱的动物朋友',
+    npc: '🐘',
+    npcName: '大象爷爷',
+    items: [
+      { id: 'dog', emoji: '🐶', name: '小狗', sound: '汪汪汪', shadow: '🐕' },
+      { id: 'cat', emoji: '🐱', name: '小猫', sound: '喵喵', shadow: '🐈' },
+      { id: 'rabbit', emoji: '🐰', name: '小兔', sound: '蹦蹦', shadow: '🐇' },
+      { id: 'bear', emoji: '🐻', name: '小熊', sound: '吼吼', shadow: '🐻' },
+      { id: 'lion', emoji: '🦁', name: '狮子', sound: '吼吼吼', shadow: '🦁' },
+      { id: 'monkey', emoji: '🐵', name: '猴子', sound: '吱吱', shadow: '🐒' },
+      { id: 'elephant', emoji: '🐘', name: '大象', sound: '嗷嗷', shadow: '🐘' },
+      { id: 'panda', emoji: '🐼', name: '熊猫', sound: '哼哼', shadow: '🐼' },
+    ],
+    levels: [
+      { id: 1, name: '认识朋友', type: 'recognize', pool: ['dog', 'cat', 'rabbit'] },
+      { id: 2, name: '找一找', type: 'find', pool: ['rabbit', 'bear', 'lion', 'monkey'] },
+      { id: 3, name: '听声音', type: 'sound', pool: ['dog', 'cat', 'lion', 'monkey'] },
+      { id: 4, name: '影子谜语', type: 'shadow', pool: ['elephant', 'rabbit', 'monkey', 'bear'] },
+      { id: 5, name: '数一数', type: 'count', pool: ['rabbit', 'cat', 'dog'] },
+      { id: 6, name: '动物派对', type: 'mixed', pool: ['elephant', 'panda', 'lion', 'bear'] },
+    ],
+  },
+  {
+    id: 'fruits',
+    name: '水果岛',
+    emoji: '🍎',
+    color: 'red',
+    bgFrom: '#FFD89B',
+    bgTo: '#FF8E72',
+    unlocked: true,
+    description: '甜甜的水果世界',
+    npc: '🍓',
+    npcName: '草莓姐姐',
+    items: [
+      { id: 'apple', emoji: '🍎', name: '苹果', sound: '咔嚓咔嚓', shadow: '🍎' },
+      { id: 'banana', emoji: '🍌', name: '香蕉', sound: '滑溜溜', shadow: '🍌' },
+      { id: 'watermelon', emoji: '🍉', name: '西瓜', sound: '咕咚咕咚', shadow: '🍉' },
+      { id: 'grape', emoji: '🍇', name: '葡萄', sound: '酸酸甜甜', shadow: '🍇' },
+      { id: 'strawberry', emoji: '🍓', name: '草莓', sound: '甜蜜蜜', shadow: '🍓' },
+      { id: 'orange', emoji: '🍊', name: '橙子', sound: '嗞嗞', shadow: '🍊' },
+    ],
+    levels: [
+      { id: 1, name: '认识水果', type: 'recognize', pool: ['apple', 'banana', 'watermelon'] },
+      { id: 2, name: '找水果', type: 'find', pool: ['watermelon', 'strawberry', 'grape', 'orange'] },
+      { id: 3, name: '数水果', type: 'count', pool: ['grape', 'strawberry', 'apple'] },
+      { id: 4, name: '配对', type: 'match', pool: ['strawberry', 'orange', 'banana', 'apple'] },
+    ],
+  },
+  {
+    id: 'transport',
+    name: '交通岛',
+    emoji: '🚗',
+    color: 'blue',
+    bgFrom: '#A8D8F5',
+    bgTo: '#5FA8DC',
+    unlocked: false,
+    unlockHint: '通关动物岛 3 关后解锁',
+    description: '各种交通工具',
+    npc: '🚂',
+    npcName: '火车头先生',
+    items: [
+      { id: 'car', emoji: '🚗', name: '小汽车', sound: '滴滴', shadow: '🚗' },
+      { id: 'train', emoji: '🚂', name: '火车', sound: '呜呜', shadow: '🚂' },
+      { id: 'plane', emoji: '✈️', name: '飞机', sound: '嗡嗡', shadow: '✈️' },
+      { id: 'boat', emoji: '🚢', name: '船', sound: '呜～', shadow: '🚢' },
+      { id: 'bike', emoji: '🚲', name: '自行车', sound: '叮铃', shadow: '🚲' },
+      { id: 'bus', emoji: '🚌', name: '公交车', sound: '嘟嘟', shadow: '🚌' },
+      { id: 'fire_truck', emoji: '🚒', name: '消防车', sound: '嗡呜', shadow: '🚒' },
+      { id: 'police_car', emoji: '🚓', name: '警车', sound: '哔哔', shadow: '🚓' },
+    ],
+    levels: [
+      { id: 1, name: '认识车辆', type: 'recognize', pool: ['car', 'bus', 'train'] },
+      { id: 2, name: '找一找', type: 'find', pool: ['plane', 'boat', 'bike', 'fire_truck'] },
+      { id: 3, name: '听声音', type: 'sound', pool: ['car', 'train', 'fire_truck', 'police_car'] },
+      { id: 4, name: '影子谜语', type: 'shadow', pool: ['plane', 'bike', 'bus', 'boat'] },
+      { id: 5, name: '数一数', type: 'count', pool: ['car', 'bike', 'bus'] },
+      { id: 6, name: '车辆派对', type: 'mixed', pool: ['fire_truck', 'police_car', 'plane', 'train'] },
+    ],
+  },
+  {
+    id: 'mystery',
+    name: '神秘岛',
+    emoji: '❓',
+    color: 'purple',
+    bgFrom: '#B8A4DD',
+    bgTo: '#7C68C2',
+    unlocked: false,
+    unlockHint: '集齐 20 张图鉴解锁',
+    description: '???',
+    npc: '🌟',
+    npcName: '???',
+    items: [],
+    levels: [],
+  },
+];
+
+// ============================================
+// 图鉴小知识：每张卡的背面文字
+// ============================================
+const FACTS = {
+  dog: '小狗最喜欢摇尾巴啦！它的鼻子特别灵，能闻到很远的气味哦～',
+  cat: '小猫眼睛在黑暗里会发光，它最爱蜷起来睡大觉。',
+  rabbit: '小兔子的耳朵很长，能听清远处的声音。它最爱吃胡萝卜！',
+  bear: '小熊冬天会找山洞睡觉，一直睡到春天才醒来呢～',
+  lion: '狮子是草原之王，它的吼声可以传到很远很远。',
+  monkey: '猴子最喜欢爬树和吃香蕉，它的尾巴还能抓东西哦！',
+  elephant: '大象的鼻子像一只手，可以拿东西、喝水，还能洗澡呢！',
+  panda: '熊猫最爱吃竹子，它的黑眼圈是天生的，就像戴了眼镜～',
+  apple: '苹果红红的，又香又甜。它有"一天一苹果，医生远离我"的说法！',
+  banana: '香蕉黄黄的，弯弯的像小船，剥开皮就可以吃啦～',
+  watermelon: '西瓜里面红红的，黑色的小种子可不能吃哦，要吐出来！',
+  grape: '葡萄一串一串的，紫紫的圆圆的，还能做成果汁和葡萄干。',
+  strawberry: '草莓的种子长在外面，不在里面，是不是很特别？',
+  orange: '橙子里面有一瓣一瓣的果肉，挤出来就是橙汁啦！',
+  // 交通工具
+  car: '小汽车有四个轮子，可以载着我们去很多地方哦！',
+  train: '火车在长长的铁轨上跑，能拉着好多车厢一起走～',
+  plane: '飞机在天上飞得又快又高，能从一个城市飞到另一个城市！',
+  boat: '船在水上走，可以带我们去看大海里的鱼～',
+  bike: '自行车要用脚踩才能跑哦，骑得越快越稳定！',
+  bus: '公交车是大家一起坐的车，一路上停很多站接送大家～',
+  fire_truck: '消防车是英雄哦！着火了它能喷水把火扑灭！',
+  police_car: '警车是保护大家的，开着警灯抓坏人～',
+};
+
+// 根据已收集数量返回伙伴台词
+const getCompanionLine = (count) => {
+  if (count === 0) return '一起去冒险吧～';
+  if (count < 3) return '认识新朋友啦！';
+  if (count < 6) return '你真棒，继续加油！';
+  if (count < 10) return `已经 ${count} 个朋友啦！`;
+  if (count < 14) return `哇，快收集齐啦！`;
+  if (count < 20) return `已经 ${count} 张图鉴！`;
+  return '你是百科小达人！⭐';
+};
+
+// 通关庆祝话术（轮换）
+const WIN_PHRASES = [
+  '太厉害啦！',
+  '宝贝真聪明！',
+  '哇，你真棒！',
+  '通关啦！',
+  '完成啦！',
+  '答得真好！',
+  '继续加油哦！',
+];
+const pickWinPhrase = () => WIN_PHRASES[Math.floor(Math.random() * WIN_PHRASES.length)];
+
+// 错答温柔话术（轮换）
+const RETRY_PHRASES = [
+  '没关系，再试一次',
+  '差一点点哦',
+  '再仔细看看～',
+  '不着急，慢慢来',
+  '试试别的吧',
+];
+const pickRetryPhrase = () => RETRY_PHRASES[Math.floor(Math.random() * RETRY_PHRASES.length)];
+
+// 答对话术（按题型）
+const RIGHT_PHRASES = ['答对啦', '真棒', '好厉害', '答得好', '完美'];
+const pickRightPhrase = () => RIGHT_PHRASES[Math.floor(Math.random() * RIGHT_PHRASES.length)];
+
+// 伙伴可选的角色配置（默认名字 = 主推 IP "小铭" 系列）
+const COMPANIONS = [
+  { id: 'bear', name: '小铭', critterIds: ['bear'], desc: '勇敢的小熊' },
+  { id: 'rabbit', name: '小兔兔', critterIds: ['rabbit'], desc: '蹦蹦跳跳' },
+  { id: 'cat', name: '小喵', critterIds: ['cat'], desc: '调皮可爱' },
+  { id: 'dog', name: '小汪', critterIds: ['dog'], desc: '热情友好' },
+];
+
+// ============================================
+// 饰品库（解锁后可佩戴在伙伴头上 / 身上）
+// 每个饰品是一个 SVG 元素，定位在伙伴上方
+// 解锁条件：unlock = { type: 'collected', count: 5 } 集齐 N 张图鉴
+//                  type: 'island', islandId: 'fruits'  通关某岛
+// ============================================
+const ACCESSORIES = [
+  // —— 帽子类 ——
+  {
+    id: 'crown', name: '小王冠', emoji: '👑', slot: 'hat',
+    unlock: { type: 'collected', count: 22 },
+    desc: '集齐全部图鉴',
+    svg: <g>
+      <path d="M30 -10 L40 -25 L50 -15 L60 -25 L70 -10 Z" fill="#FFD93D" stroke="#FFA94D" strokeWidth="1.5"/>
+      <circle cx="40" cy="-22" r="3" fill="#FF6B6B"/>
+      <circle cx="50" cy="-12" r="3" fill="#3A8DDE"/>
+      <circle cx="60" cy="-22" r="3" fill="#95E06C"/>
+      <rect x="28" y="-12" width="44" height="6" fill="#FFA94D"/>
+    </g>
+  },
+  {
+    id: 'witch_hat', name: '巫师帽', emoji: '🎩', slot: 'hat',
+    unlock: { type: 'island', islandId: 'animals', stars: 12 },
+    desc: '动物岛收集 12 颗星',
+    svg: <g>
+      <path d="M30 -5 L50 -32 L70 -5 Z" fill="#7C68C2"/>
+      <rect x="25" y="-5" width="50" height="6" rx="1" fill="#5C3D8A"/>
+      <path d="M48 -25 L52 -25 L51 -20 L49 -20 Z" fill="#FFD93D"/>
+    </g>
+  },
+  {
+    id: 'flower', name: '小花朵', emoji: '🌸', slot: 'hat',
+    unlock: { type: 'collected', count: 3 },
+    desc: '收集 3 张图鉴',
+    svg: <g>
+      <circle cx="30" cy="-8" r="6" fill="#FF8FA3"/>
+      <circle cx="40" cy="-8" r="6" fill="#FF8FA3"/>
+      <circle cx="35" cy="-15" r="6" fill="#FF8FA3"/>
+      <circle cx="35" cy="-1" r="6" fill="#FF8FA3"/>
+      <circle cx="35" cy="-8" r="3" fill="#FFD93D"/>
+    </g>
+  },
+  // —— 围巾/衣领 ——
+  {
+    id: 'scarf', name: '红围巾', emoji: '🧣', slot: 'neck',
+    unlock: { type: 'island', islandId: 'fruits', stars: 8 },
+    desc: '水果岛收集 8 颗星',
+    svg: <g>
+      <path d="M28 75 Q50 80 72 75 L72 88 Q50 92 28 88 Z" fill="#E63946"/>
+      <line x1="32" y1="80" x2="32" y2="92" stroke="#C42835" strokeWidth="2"/>
+      <line x1="68" y1="80" x2="68" y2="92" stroke="#C42835" strokeWidth="2"/>
+    </g>
+  },
+  // —— 翅膀 ——
+  {
+    id: 'wings', name: '小翅膀', emoji: '🦋', slot: 'wings',
+    unlock: { type: 'island', islandId: 'transport', stars: 10 },
+    desc: '交通岛收集 10 颗星',
+    svg: <g>
+      <ellipse cx="10" cy="50" rx="14" ry="20" fill="#A8D8F5" opacity="0.9" transform="rotate(-30 10 50)"/>
+      <ellipse cx="90" cy="50" rx="14" ry="20" fill="#A8D8F5" opacity="0.9" transform="rotate(30 90 50)"/>
+      <ellipse cx="10" cy="50" rx="9" ry="14" fill="#FFFFFF" opacity="0.6" transform="rotate(-30 10 50)"/>
+      <ellipse cx="90" cy="50" rx="9" ry="14" fill="#FFFFFF" opacity="0.6" transform="rotate(30 90 50)"/>
+    </g>
+  },
+  // —— 特殊 ——
+  {
+    id: 'glasses', name: '小眼镜', emoji: '👓', slot: 'face',
+    unlock: { type: 'fed', count: 20 },
+    desc: '喂食 20 次',
+    svg: <g>
+      <circle cx="38" cy="50" r="8" fill="none" stroke="#1A0F08" strokeWidth="2"/>
+      <circle cx="62" cy="50" r="8" fill="none" stroke="#1A0F08" strokeWidth="2"/>
+      <line x1="46" y1="50" x2="54" y2="50" stroke="#1A0F08" strokeWidth="2"/>
+      <ellipse cx="38" cy="50" r="7" rx="7" ry="7" fill="#A8D8F5" opacity="0.4"/>
+      <ellipse cx="62" cy="50" r="7" rx="7" ry="7" fill="#A8D8F5" opacity="0.4"/>
+    </g>
+  },
+];
+
+const isAccessoryUnlocked = (acc, state) => {
+  const u = acc.unlock;
+  if (u.type === 'collected') return state.collected.length >= u.count;
+  if (u.type === 'fed') return state.companionFed >= u.count;
+  if (u.type === 'island') {
+    const stars = Object.values(state.progress[u.islandId]?.stars || {}).reduce((a, b) => a + b, 0);
+    return stars >= u.stars;
+  }
+  return false;
+};
+
+// ============================================
+// 成就徽章
+// ============================================
+const ACHIEVEMENTS = [
+  // 启航类
+  { id: 'first_step', name: '初次冒险', icon: '🌱', desc: '第一次通关', tier: 1,
+    check: (s) => Object.values(s.progress).some(p => Object.values(p.stars || {}).some(x => x > 0)) },
+  { id: 'first_dex', name: '初识朋友', icon: '🤝', desc: '解锁第 1 个图鉴', tier: 1,
+    check: (s) => s.collected.length >= 1 },
+
+  // 收集类
+  { id: 'dex_5', name: '小小收藏家', icon: '📚', desc: '收集 5 张图鉴', tier: 1,
+    check: (s) => s.collected.length >= 5 },
+  { id: 'dex_10', name: '收藏专家', icon: '📖', desc: '收集 10 张图鉴', tier: 2,
+    check: (s) => s.collected.length >= 10 },
+  { id: 'dex_all', name: '百科小达人', icon: '🏆', desc: '集齐全部 22 张图鉴', tier: 3, reward: 30,
+    check: (s) => s.collected.length >= 22 },
+
+  // 星星类
+  { id: 'first_perfect', name: '完美主义者', icon: '💎', desc: '一关全对获得 3 星', tier: 2,
+    check: (s) => Object.values(s.progress).some(p => Object.values(p.stars || {}).some(x => x === 3)) },
+  { id: 'island_clear', name: '征服动物岛', icon: '🐾', desc: '动物岛 6 关全部满星', tier: 2, reward: 15,
+    check: (s) => Object.values(s.progress.animals?.stars || {}).every(x => x === 3) },
+
+  // 伙伴类
+  { id: 'companion_picked', name: '我的好朋友', icon: '💗', desc: '选定一位伙伴', tier: 1,
+    check: (s) => !!s.companion },
+  { id: 'fed_10', name: '喂食小能手', icon: '🍓', desc: '喂食伙伴 10 次', tier: 1,
+    check: (s) => s.companionFed >= 10 },
+  { id: 'fed_30', name: '伙伴饲养员', icon: '🌟', desc: '伙伴成长到少年期', tier: 2, reward: 20,
+    check: (s) => s.companionFed >= 30 },
+
+  // 装扮类
+  { id: 'first_dress', name: '换装初体验', icon: '👗', desc: '给伙伴佩戴第 1 件饰品', tier: 1,
+    check: (s) => (s.equippedAccessories || []).length >= 1 },
+
+  // 富翁类
+  { id: 'rich', name: '果子大富翁', icon: '💰', desc: '同时拥有 50 颗果子', tier: 2,
+    check: (s) => s.berries >= 50 },
+];
+
+const computeAchievements = (state) => {
+  return ACHIEVEMENTS.filter(a => a.check(state));
+};
+
+// 根据喂食数计算成长阶段
+// 0-9: BB 期, 10-29: 幼年, 30+: 少年
+const getGrowthStage = (fed) => {
+  if (fed >= 30) return { stage: 2, name: '少年期', icon: '⭐', size: 1, next: null };
+  if (fed >= 10) return { stage: 1, name: '幼年期', icon: '🌱', size: 0.85, next: 30 };
+  return { stage: 0, name: 'BB 期', icon: '🥚', size: 0.7, next: 10 };
+};
+
+// 心情等级
+const getMoodLevel = (mood) => {
+  if (mood >= 80) return { label: '超开心', emoji: '🥰', color: '#FF8FA3' };
+  if (mood >= 50) return { label: '开心', emoji: '😊', color: '#FFB562' };
+  if (mood >= 30) return { label: '一般', emoji: '😐', color: '#A8B5C7' };
+  if (mood >= 10) return { label: '难过', emoji: '🥺', color: '#7C68C2' };
+  return { label: '伤心', emoji: '😢', color: '#5C3A8A' };
+};
+
+// 根据心情/阶段返回伙伴主动台词
+const getCompanionMoodLine = (mood, stage, name) => {
+  if (mood >= 80) return `${name}超喜欢你～`;
+  if (mood >= 50) return `${name}今天很开心！`;
+  if (mood >= 30) return `${name}有点想你～`;
+  if (mood >= 10) return `${name}有点难过...`;
+  return `${name}好想你呀...`;
+};
+
+
+const isIslandUnlocked = (island, state) => {
+  if (island.unlocked) return true;
+  if (island.id === 'transport') {
+    // 通关动物岛 3 关
+    const animalsCompleted = Object.values(state.progress.animals?.stars || {}).filter(s => s > 0).length;
+    return animalsCompleted >= 3;
+  }
+  if (island.id === 'mystery') {
+    return state.collected.length >= 14;
+  }
+  return false;
+};
+// ============================================
+// 真实音效库（base64 内嵌的 mp3）
+// 没有的角色会回退到 Web Audio 合成音
+// ============================================
+const REAL_SOUNDS = {
+  bear: "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//tUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAA4AAAqwAAIDQ0RERYWGh8fIyMoKCwsMTU1Ojo+PkNHR0xMUFBVVVleXmJiZ2dra3B0dHl5fX2ChoaLi4+PlJSYnZ2hoaamqqqvs7O4uLy8wcXFysrOztPT19zc4ODl5enp7vLy9/f7+/8AAAAATGF2YzYwLjMxAAAAAAAAAAAAAAAAJANzAAAAAAAAKsDvJKlj//tURAAAARMD1m0MYAAeILqmoYwAhTRXXBmEgAChCavDMJAAAAMoBAUloADmgAAAAgMFIfgmD4fLicEAQ8Tg+ny4f/p93SBgtQAShwMDFmiC3D5QEHCcHwfeJwfB+XB/rB9/4fUOeNTpKORE5oZkUoi0aoOxazLLUtpXwStU6RxbEcIof2HVLcb1G5799bMVsRwio1RTeXwfFIPiU1R6hy9Gc10C7CZlEvsmTdqCZ/7XStF6JvIqgAICIABDgAC5//tUZASAIWoP1+88QAAg4fr554gABTCvZUYMTsh5hewolA1IetxGQ3leqrKxk5RByV3AliYQuzzoCQcOeQQclQ9d5Q35H5cH4MAACAAHT1cuQzOcB50bniZb43hx/gnllaAA1QBp5DsPYUFwQ2qAB5N8HB+WRJ4zmSES4v097gaFE+CiKnNqcvpf0b+gR9v//wrEEA4UAAGAXIywKmzjTyXBsAmpv6so+xN73//t/8qRilGlJE0ACMq1sQgesoFe//tUZAeAEZ0hWlHpE0QcwhsAMAZwBcCvaUekrNCBB+xk8SXIhKuQl8mSFx94Y/6zc2ygocgJWkYZE1x2R8h+vQpD/0UAEf+ogieJ4eB03AtYh8mCQpox0vHxmAbWEA5g9Oc/5QP4iiAEioAA9BGUgKYTdahParU9iqd9JBn9b8jywpDLLv8nCFev6fzBECv//+o8uABYAEzmC/CBjUm0uYMm2Yw5u+dapGq2jRLA/Ar//qEVYDpFgAlloAEBeEgB//tUZAYA8XAcWenpKUAf4frACwwCBjSFZ0ekrOBzCCvA8RmIPlrK2A0BhsuS10JluYY87yGQe5G8NbKOcD2KujQzxIT/6HFKdCnUcZYwHWG1BAAR1G1GzkCm+3wqPGV26hwb/o8gA2GBMjYAFUkbgWZzXRTDDRFV2E1FzcN/luxxI0FgHgPK1WUngViMpMiQmKk/mKGf8VTZuKsCEecCCo8KzJnDFtOFbmDZO9Y4FC6T0537lTg3GkhinMVZ6wpk//tUZAWNUWMb2IsLGzAgYdsAPChkBjyXYAywqUB2kyzUwwiIcBO32dZHhqrv57TNyW84KB2P8JXLw6dc2EHlg0fzScEx2F0QoAGDwRSwKWrG/ZvHc4ePwzbmUDwNnJQys/Ww7b+v1kvsSQpmZuw3CWLQUYFKWpef+ZmXoYkZ5ALjIwu6wsaj8Dh1hwwAxR9QoJP/6j/UXHAheLqgCJXovIBCxBLv7aiioHE29H5Ho62+f/6/4JVAowmkAADgAWK6//tUZAUBEXEZXGmBNRQeQWuZPSIihRBXcWeMTpBthC6wwrCAwDYQUKxm0SzovgufYx87Nu6q9ZVl/qxEwcYlrQLXlRD7ck70wql4hAAPX8imK+cYakvAABrDtUOzBJbiJuUi/P/9aIJAMIFZGkpExMSkFOzpzDYPqJRWU5FPtggw732EOH4NllxPsd/WGtWLVbiQANxKpJAfVgHGYeUg5jYOD0livQjv//oVYkZ2DLIAnqAALB47EDcWFZWP6g6M//tUZAqBEUklYHksENghBKu9JCJ6BMhlbIecTMByhDAwkJkG+kJAdrh9DGeT6Fk7tawJ/T//8GNgW6JgAIMAAAcUPohJ2Ymz7JQk2i1/Lyy+Qb/Kwf///oMiEgFAIKHrl6C/qwl8cknhcvEfxWZzKq6lYTpeplR2wmtmG1P/xLEY05aESbZEp49ycAA8dgByFEziiA094r10/+qQqLiMyUsABoImYHQj8uEgnHWgQ2uLljtro7WpsERZrasxXFg5//tUZBIBETwX4OGGKjwaQQuIMWYQBLCXbyekRQBvBLH0YRjGkP9hxBpiAAWoZPDgINgKCijyZAbz20bnYmTWGmBLAAwAHhMgQMgJRXEW6YiNA8Oywn/ykILKYnh0t1vsX6K3//KYKXJuyahtuQ0AnsE0YSiYJkU4DJ+2rOQt0wLq/5EAgQcmhENE8OfuOO51pVFNoT7fBEPbJ3IAowJjb40P0597FJc24CZ/UBoGpRpSUBAABQMuuKKGGNIsYCYG//tUZB6BEU4bWisFG0AbQRvdGSIJBKyVf4YErfBlA23kgzAIKrM6013b/+tkkkmsklLRcRDhWIwwvynBaOWGJtQ4kyQsyAMWgJljXr/p9goY6AAQAEgYQQALD0YWKdykGsK19K1LSr2f/JJyJEIFlBBcoAAeVGxMFcUDJIAjRUizlMenmNR7XyU+PnMrwZf+n0IANkKgADgAwjNg+JNOIoBKFKWj9liLKPu9ncwGwFQAboKEDE4FI0mSmSPEoEc5//tUZCqBEUUlX3khFEgYwOuZJSYSBNQtcYS9gEBsA69wYLBGx73KbGXPwyHWihc6WN1Gq/8sGmA2ioiBEBJtnB4rJidRCVUKvBMGH1vGRC/X6OR9g40LRwABRaVqEFL3yI9YeCDGFA86E06Rkij2ZIXv1E8BFvWKt/o0jEZqTIvB0a7DzYD0doGu1BHe9SPpuj+2WYCFJIAQaDrZvihkdXsn2eCbpqycwN6cb0aSZuSetwt7/GnOpa3sdADBJ7Eh//tUZDcBEUkV3unpGWAYoStQBewCRJhHcYM8wUhvhK5kZ6QIAvobRdoN9MHjSRruiPioiW1dRv01hTUBYIVgAhMIQ2BnScBGwABZEippOUnIEgwBoMtUeK0LMjGbvU3EmOAKBWAE8V6TIfjkLjwFazwvo5TJSdUvpe3f9KAQAAFiESwYDpE0Xj4TY3gFoFS8gqfhSQ5GHZOhQPkSLyi45isN/78vLAbglOhQaX5wQNSON5gwRj63AnjePd079Mmk//tUZEOBETsLXmEmCjwbwXuJPMMYBPRVaSYYTsBohe0A9IhpwSAA7gABBPnIKII3IcL/LzyQPEcpLxeGqka9xTHluLw1QH8U+T5iBUQASACNPFHcEWDHMZiQmQ0HNWuMYtwB/Z/9WBLgEAL84WOAoOS59E4WfYCJyXn770He173CDLoEccOz9RowXe/1ybzYSG7WVZTyIVXiGY/qwzKsClhUoe/o4TWhFIRAAAcAANFZoAMKKnw9NK7QBSvk9YRd//tUZE8BEUYP2+nsGUAboRtZPMsWBPhla4YMsgBhB2zAZIxhCsh/KLDHvLghm1+3//lKO7YBwoeABgA4oDkQTmlmJ0gbM0SU1TXUbbKf/9PYSAeACezLJVA+h6waYY5QLIuwE8bfWGtwpssLGlWi5DDf31hnEVgLoIFK2uPrbCtStKNPZ6axzHe58OliZYZ/FaNWQWAQpAABpzgmIY4lQ4MiPnD19RvZN5lJANU6KJjT/glLpFK8Dgwnq6iH9GmE//tUZFqBMVciWumDE6IaAQtpGSsABJw9b6YkY0BuCSxA8BnByj6EL3u6G47FnLo52MQQQ05WKcxoEAwFO7XKdxNYoPHMDGjADnsZjehdspEA4VK0cHD6bRjf/kYAwAYgIaxhYJQ2ldvCvLALuBj3ow8IDyCqCdSI3/9KgASFxAKdAAGnSAZE/CiTgjqGwUrj1whiF17Yo32sS38j3nyzKgnb/8iLMPhSBQwHCkymwuiZP5TazyUGwyBQrDPjHvje//tUZGWBEREJW+kvSJghYxrwPMNoBGhJZyekZMB7hi0wxIiYq3SCgFSSu3SsSxZjyA5DJSaRe1A05MbSOihydeNE5ugfin+LLFn6darozKlnX4dSQs/DCNrWFizqAjgSwLnCbzJU9u/yVcm4SoirQAGII6dhCA20gquCkkgvPV7dLFzxkeQBitJKR26P8m+AAYACAATolQNBoFonkmFldGrCmLj5tYAOnZP1CP/6YIAQBOhIcgfJFFy9tJwWBqRr//tUZHCB8UkYWekvGcAdQesAJeMKRFhPbYYMTqCFB6vAZ4go4sTDBoquIKsHEkN3F3oDr//pqTZLZKpDCQjAgP+PSyvP+WKfsQ0+gTPYwT2atX/4fcAYBGAA3QAAqUgPhuGFDID4NAKwI9w9ziZBLS1tiVBfa7xV9ZulOtuMvGADIDnQcH+ToSAEIDIwSZBBWYkmE58fJziaCQza3/1AtAASAwAVBUrWBEZ/AtNYrHRnT4OS4IqW10j6h8/BmXpN//tUZHkBESgK3eHsSBwfQRspJM8WBHg9ZSMwYUB7BK7wlhhW/o+gNopoq8SxBqNBGsDUrsCDdKMW4ggoyilxZiAUXFm1H0yGE/ZdOOWhpEFAsMAB8FFc+RMKCI9oEYdF98nK1yvXxGItyXjgBboPvRNO1aP9JCAtlFkjeAAw6Q0EtIydGPaooE6Sl61Js9x0TRfmLyR/IdP5mf7qPAAYmQkQBGUDR6QR0DzrA9EWzRkUBvPASq0q5pXcqdHqfDhh//tUZIOBESgI22knMogloqvcJCKFhExVZaYMTMiaBm4wxZlGL31Br7KwrhiMABrDWe5DhaurC9QtApwFoqIr0nmbN4buJpBO9FK//w2qwBLAQA5gA3rhvRBi06w4KnMEfULPfaEya0sTL2R8FFgAf/+GaAAAxwVCENbXSkjOZzsp/iHwevxZt77hMXUJpRW5ZVy6A2vkX8tmd0jl0ex6nYUkUmGmiRRufCSpgbrVqIrrra2dvDNmv9VGykBiwiFN//tUZIeBEUoV22HpMMwmZKucJCKDhUBVZ+YYTICKCCxk85jAwrh3LoZYzmREJJMjok8dfTsC54ASjIZS0tNHX57tukwtrMqhzBD5G9maEVpuC6T8Bc2J/qbazDSblyuqtZZfZuOqAzv6uAgAIAAXAAAPAzjHEY0Py02fWSk1ZrA4MDILFyAFDncU1P2f4fwHBAU/To4wR8YvuRIbrITKpYsqPBlFZ5BlwgUldbq6g2wmAQXDg0HkjqOOhfI8Ik4U//tUZIcBESIVWWHhE7Akgrr1PMJ2RERji6eYRTCgBa288wzQX9iOa5Bduz3I2i4ewT9Rv/ZXpcKi8nGlLsAOaE8xG8kk8ddeTq4pBEPyxHTdKYiX3/yBNIM+11Yb/olIBQAaWSiXBWVTDPcVrVADR++BJPblYN9a3Js5zqN0URE/Hn8l9NhKISNOIt8SqgQRyDdeHo5anB5AEUNRs3QimyDyNhBqIDD33v7mY+gSEqgAXUiDEMIcEKBkdaOHFtSg//tUZIuBESIVVoHpE0AlQUstMCNgA+A9YQewZQCckqy0wIoc9akiUuI3k4pphiG7TXFL3LJVggAASQAwwl3EIFU3s66SjM4lmAhRIJgKQzCiJ0SfFjyfrAxoieLWkni7v5PJCMBTABlbQPSO8sawrlBVRSmsHBsaoJHnqMkbsIf/uzg0R1I6sRcNAtfFKEtltYpwyqzIQGR7a4uoaPGnN/+TgDeDoAbuVEkgYg6Vk8jiykAUi02EvKUfuZQ/5Tdv//tUZJGBESwYW8mDEzwoQormPYM8BLBjd4QwQvCUhSz0k6QADxN3E9vWWVFRIqpDDMQApKAA+qaGY/w82eONFR9LVosouyCuLs+EMunVBVOvU+vLnv1YRngC1OAAJBo6AQEcpCtiryuDc5kpwqLgjrOZbz82vMtiqq/f/6fcb8Ro6UcUqVRnIHWjEMSYbMxgI0OdQAhHatwBQIUy+r/ux38jyIa5iApIBMQ4UItTEZee3KYBD7GDeu802NeRvNVJ//tUZJMFEWAV1snmGzAfwVspMMIoBAhNXAewRQCejKz0wYmoUE/IHGer85hywABAwBFjmUQG1iMVKPwvH8//Dry4amWwERy8WUvEqidu3AUMAKAAVAkOAHHFURGmfkQhl3BAN3ktSNsQcs8LExe9A54uR3f6KICa2soQ4FROwMvUrswQWCihiQCv8/slVkTAmrUoNIQn3/6HuvDsIB7LbSsCoYUDgtNn3kACs/C8Sk8lJXprxnJJ4+UC2/+ghaIh//tUZJcBEUMR2mmJENgqpKsaJYIMBBwhe4YdIjCbjK10wIoUAoAPwAGEVQLAPGzrhpEGQDmOqq1uIWcjrkQV1g2V9ABih5r6/GAABgADW/IyQECckRYQRLJS2xlzfdTFSCFyiA9TkWCpQQAApkjkhEDUlhG46eEQRbkuezLZOPfovL0D30J93NIZgqw5RG3kVcujnpGCVlgvaPPiWiVTyUcIJ5foQM4JyjQyI/QqrtsMraTjAAEPx2FNiEQTNh14//tUZJeBEQwVV0DMGFAmwcrpJSYmBKBjWqeYbMCNiqxkxIzQFsANMg7DzgaJ0XqxjKGf7+OAQAMAEIZGEno8+pzTJR3TsF5Jnc3pYqmbs+DmQt7LMGP/qz2jUqbcEoAAU9FOAmK831Y0F+m53XYd6TfdAI0ydbGwMRd+np7IAK1jLuLMOrJ2scymwvj/S0hwlRq1IfXjxELEtufRzzWwAgRY1xgj9mYc6NyNBD9dUlea9EEGdpCI3CcuK2t15GBA//tUZJ0BsT0V2OGJEPgdYdr4PSMaBDQ5ZaSETkCSCWrA9JmQH4APwCkah3oQbsHepylS2TpqVHc2mC7H9m0+z4WHJ0l1+WojNZIwZ5LqlJrZPqhBIgaaN36wa7DrPYEc2dxcYUq6iggsFAAYOxkNYFhlGXzuJYvbFDWnBHzysocXEIIbBPbi+J06laXJiTcm8NNibQ8IxKgTFDH24sdaWQTVPqEtcT5luUDXd/XB0XUfiDwzL6N+gIBJMh7CDyt9//tUZKUAMRALXuhMEEwjwjr5PSM4BLgrf6M9ILCBiutU8w2A3Jo+u/RK9qnJwM5gDovzjaTjSbjcRwKQwCvsNN6h04C7hYiWoDhxzx8QGS8WaxfdVepURxwnYTDtSsfsaFgJbEoJDH679QNsNVOzMkLWi6k8Yb3KoUrhdhYMNZYWdFaLJOIOKARSDc1CUkNspMorx1jb4UrJ1PbHaTBRCXo4oOU3YzETZU6LkoQhzo4smty4UKpnwgfTZOilWlsu//tUZK0HEPkV1ynjE6AlYxr5MeNQBABPWKewwwCPBevwxhiYWTYtLsmqWZmU7hFmbUFycfr0MFQHIueQdW74sdcGdzl5wN8BsVkic+qANYViM3dziLk4esYjfo0tbMswZd2hXuNVcW1A5xGYp85SxQxUwO3eSCLZrpFQYXsU9INom0gxuDfcP/1CAACOQs5lssi4IrshSjdKUNblLm7XkYGMj9LMiu6WpMXUYEoFwkNSUAAJAxofHKLstijlAKfx//tUZLaB8REV1gHpQNAhIqqwPSM8BLQrdaekxLB+DCsAxJWY15tDs+nP/gt6XRghHPl0+cbSz+hwVpmJceFzuFCQo7DXsTRo4xlrWU9DkeW8GxX2N/Rq0bhTjSYbgABvqQU81V3VJxEetYwAyO4EeoJ3+3pa/suvRz/oI+wk4qR/oBRR6CfmrPSY7rBQezkcf27h5IYBHkHqku6/x2A4IAOSEbIJA0NrlzS6no3AMR9bInfLKVFRmFAGw0hRuUwA//tUZMAP8RQSVYDPMFAiIjqwPSZkBGRVVAw8ZQCGiuqA9gi42pHsbkXcVmKMbdYr6stV8kyeuCv4PeHWMn6BA6a6OiqQAwCHjCvB5sk0g5JmMuxFXHagRdCKSC18EABymCIknmMMYd+s3UnYSgvl0FiNkO2VBDyk9Wfs8Z1Z1wYbeOAzgVkdtOAAYDfFiN5fGDbZJOmNtZIo94hPKAg9zM6VKuO1NC0tDBil30wEIevnACA0h2MTOnAoJ9TPjk+4//tUZMkAcRkS1QBvMFIiArq1JaZQBRxVY6SYbCB6iOqA9gix/SxNtvjnrH3CUYFWgAcPFRKZzlXjciT0toKGNSYFUCzDCWKeUBTWjrN5Z/KdFZ3yARmUWcJ0TjtmtBekoW0w81UidN+aLkMHuugCLx2be++cKN1HU/RAIOALILZLBkM/KZ0rWRkEJuzyx87IY3bvXIhSX7K0Yv6+keEUwAPYXS0uicUYWWMAOWWKvMlxFCDyKCiFQY5WymhLLxd4//tUZNCB8VYVXOnoGhwbYbqwGeYARPQ9VyY8wwBqCOsA8ZWYivQqpbRKaJRSgABei6qUtxTPC7q6VUeVDd+ViabcVhVTbdOMOBWx6VZJfBO6PfqDnPFxSDAEDJwpz+ldMkZFBtK7SkUrZhrYcUacaih/bg7azjAAAAIAHwBvgFAEeH5YyUXHEs4r4SLFYjkZM40mKaZc2sx1x9B+CJuIXZ/UpjmrT1uN6KrgoxZ2u+unSqgbCiizfoXQiMdEFDgi//tUZNoBESYR1ahPGFAfYfqgMgkQBJBhWyeYTIBsCCsUxIxgWSJLJTmmEICE6ABRuXQ6Bw1WAysBnhrCJAxpu5FEA0FM46C9fo9XOAy863F9aw7rP9BkpU5weqHvYigbm+uAcTK9BSZOZPOXBsVBGToEWyXSMGXCyGvJ9ikWetkJUoVCUy1tzjFSQFwgLX+kg7TmGh22vhhoHIcWkGOwl3G4LGYlE7lUN89AZ6goxS4Nb2VrTRATv5zZ8LFRMtDF//tUZOYB8SsJWUkmEhwowwpwYeYaBEw7WSYsygCWiWoA8JnARd2zyFWMyx0gCVGrR2MjGSycd4AMKaIkILg2GKIToZNkjTja9owrvSLSZZuBPntAMZ6fyWUDW+NmKkLneIoVlBQPkbURCcuT+yg0mweOiZREgR6UHqqlWko0m24AAEo+HY6j9hKJZ+DfymL7aCcswwEDJbaLO4vMRftAXUvlFKzR3e1+Q8mKp+Z6nTjx7tXre2EV+PHJAYysfPhY//tUZOiA0XUR2mnmE5wiInqAPMNmRdxJUSewTMB8h+rE9gxovjVZePtKj9BSvf/cyoEBQCRcAAWTB2jclU5iTRkSM3Fh6yEHtIrK/BNglf6ldzTZzf6zVbvJjGpNDEfzwmiJaKVgteXrDc/iN7SGL1m9iOPwybqbF9qEdEZtGgBNH5aY6I4/qJEfbBaRo5+YeomkySYeMLk5YM+OttGc/P+V1EM2XQupSOgHYik8PAmXJ8EvGuxmuhejz7HDEQfz//tUZOcB8V8VVTnsGUAngkpwPMlkBCxHVAw8wsCVieoA8JnAptQU22LAFcATbmkAhwnL5KmROhOkWgFjWYSrxaR6aCiKaq/k3MLAxCe5mX/v1Pb+YeQAAHE8V4E8Qed809tcRaCT0JG1WJjQZEx5nDpmtORau8sukzHDvwgAFVRTPJoZUBQ3jmNKvmmZMiEoa9jdrwCCkh/Io733IKr8WrGhi3z6v5Evh0soOwgyWUhgJrTABpVjhV76cjMNLKeh//tUZOeA8VUVU4MPMNAmIjpwPeYKBgxhbaYNDPCJCWoA8wGhomtiPiZYUQrb5r1KgMIUpWCN7hskY+nzCLa532jNfrld2SG2oDETnmlSJo3Ugvc7cSVr6DlOg/BNhnvm5YiKl2uzHe4ViF+g+pO4jtJfRObdmXATjH+z1xV2WYkxxJ0tdYnNJUF8HpR0HJGRwPk17gZgELuqd1ZpawHSnUZpi6w/uwKhBFOuUWFmqFPFR4sICLKQIiL61MsW5GkJ//tUZOOB8UkXV1EiM7QiAlqAMSVmBNhfUAeYbMCAh2oA9JiYUwMQQABNAAVsBoHgTGxmx4FSyNAoepYaZg4Kc2i7R89e50UcDEXUv+5gsGdByYnW7giONWn0g0Mg+pB0QQYLXVijf9lO/eFIZSYUjBA7RgkTOna229pcQD30A/l0M/a3OTRl4C9KpS+iX3EETIU93rOeA7m4Q22l9qA1m71EI1jctGZDQ29HS5wAGdLYeno20CtTlY0LNNqBZM/T//tUZOiBcXIqV0nhFBwnQlp1PSY4RVBjTqekzECSCSnA9iThpaqgSQKALcAAlBmEwGWwHa8aR9gBHnWn5PQlrQOBkGjgAKB2Tbw7m91iA/QAAKWAABjKpPBsjqMQiDaoN2UEISdhxyIFITxQ5kGe6WcPxVAFHdgaGHcO/1iwXBZIBUkYwksKvIIcoxSTQeqfS1tNKTAxlO9jn1VH+g7ZvQs+Q5R/0ckdRSLY0TWk27VoJCPSih2M9RI8GhdUoaX0//tUZOQPEUAY1AHmFCAj4wqAPMNkBPxPUAw8wwB0hCvk9JhQVaolCmSrWADUNpvELJGzRm6IpVYdAHY4DomhFpTZzLxJLpfG6Q7QRcdPmGdGSPNNpY5Q4GtkaeOYxPAe9xWXqXHYKBNAUAxSBGXA1NpMyQ/BEwMdo6KR0yJXzDQo935MGhUzMiyoVhd36sKdzwJtfyteeKJVIqiHsHYCNU6rlmUwQzKAQXTAl3ScrEQhpumFqZpBVAySrAKE0K4a//tUZOmB8V0V1dGGGwgqIqpwYYMsBExVVKewZMCRB+oBh5iY4k1pxiWdxNUQEe2GoJqBlbULirqSQ2BCCxNRWQ0HZYA8rXWXf8n1KrVyU4GIdDH31D09TEQkBcBA4IgUaaGy+FThUZ9EQnU1RZZa1hB9XYWdnfpjjSCZI1DyVpDx8CxvzvVUQiZESJ3T736ibfWNzs+uDdqNSc30He5EzG2CAlis7GUiogIpkfIQ8dBCScUdb0U7VCdQZ9yWNDDg//tUZOkBUUIL12EsMDguYqqaPSMoBHhzUqYYSUB/CSpA9IzgBZVXq+4IIEATACem4qMkNZLL8dUjzRreWPbxIzu3oeoEIXOUox2jt+3xpQ5oVCyP2e4IAAAfVeiQWx8d8sVfQF4YzvUkB6enJjCrTZjySN+9Up2WkRNv89JEl9tgRIAAwBDhnB3EsyUJzwCwquGUCDmX3L2g4qbhyARcZig8U/AVqEv8gIRApceU3i5w0MHTcoGVqoen6K1PtHCb//tUZOmB8WYSWWHnGowngxpwPYM4BTRja4eIbjCRiunA8YnYw3tpq3/3aqjCwEAAbgAAAMsArw+hSYxgDWZDuQpiG9vgYfMmSVtcN0aGdyKvO+m3s/Yz5gy7QZWCAWAAU2UiACuM08lR4caHRj0IcO2anxqxnVDUKpCUwAChuVamLg7ilyXDjhkB1Jtm2ckXXRbhcCBtuxqpk3BHUhl766ZBAJXI55YetJFRj9uQESbB0FzqOgpLNyqJ0VnK2Pf6//tUZOYBEWIVUonsGzIfAqqAJMJKBQxvYYekR3CViOpk16AgryaNh2rEM0EgAJ4AAMyTOV8K2A+aGU8lGaJbnCPdLU2BuJJuupOcp+NcP0MCPfQn84QZ21MeCBTwADMfZDUwjNHdWtPZ3YmWyDIOai4LK0pJFmjXSPOaIGe9XJyHOPNPmExMCypcB+iot6jAYM7so4K3wYt2sccbv/iYkrE4b4WkRNkquxa+vCiqjR+yyIAi0ISYqBkCKDUawGJH//tUZOeBEWgV00sPQNAqYrpVPeYKRQhXTyS8YYB3BepU9JiZzKDqNVGABhgAwulAI0DdOJMdQlt0VgoWTxgC2p9cjDEmP5rodl7UCc7YecZTnJH8h0gFqUmZCbxJxYosKazrWhyvvtM+tAzkYT/sDVtkUwwo5Sh86WCgA0gLCAqSvbiKpZFCiEJH5wA9d03SpMqiMy9jA/I5fzWPFOIOhNBSaqkQiaC75/Q7LTqYoLCkul3QrFZ7r5TJ24YCqCIO//tUZOaAEX0hVOnmKzAbwMrJPSYCBhCDV0ekR1B1iSmA9JhgIehP/NrMREJkhKcAABIXyWIgQIhyiOBVUrgB7iJ1Xmp6KN3dU9GgjzEN2M3xQC6t44YPaccAtYSiYBRysq2WGDCil7uSknrUI9J8o9pwcPqBn/1oYCAB7G/Up6CjNRQ2kSkyJDUlPZNONWH4Li6mZEoZTuWNquj7l7r9yAx7eEDPmI/MqyctIsGR8yaZjmTVhDsiLVUKkKCAKGg5//tUZOeBEX4g1GnjE7IgYXqpMSIaBNBZUyekZoCVCilA9gygX7apRsNsrUAAWZK4B8mC0GkfEMmSZYVJ89Xxx1OyqEkCLRTkfC3BPi03Emf5jP+UEwHXTjy0pa91FBYSfsqcBR3mKEE4/A4wcglc00j4vdHfvuuVhp6GsnTDFKSyyhzK+Mc+mUl59RDKMtGoByn0kchZlgtTtzG+YAH/jjiaK9SuRYVdGbT+HrWcB0INlSvS817ZKMOFiymTFp4j//tUZOeFEX0WUrHsSTAeYkpgPYYmBRBZSgZhIwCUiOnU9hgolcTsJf3VwCBBQABNAAAiR2XTRnxU48usM7aMG8UmTU2iSJ2T9ZIOA+kzVTo52+Y39gg0maDafpaAEYbWpnCqhBcUi2ebhjsTIMk7HLQBkD+/Gv3bM+57LeqNMhgi5obCN6waExMAjfPGk5oVeZzKcBYxNuWDKcL4OD4YocytqiimQQDmIzkAtRUegaEpG4BZmr40IjU0NEgGRYdo//tUZOeBUYEhVWmCNMAeQjpwMQkUBbCFTyekTQBziOoU8ImYA//UwXBSAngAAmjJSyGyJRZbkiyKF4rDTSLSINbIWCdzd/YEGpbKZY8aE8iIMZ41JofW/zYk7Gb2NRgoCY0DwKhsSCI3qcFXJ0mc2wEDmgOiukh3BjtVOyNxONsJSWHguSowqDJMgeCCKSSLqMor4ELCHKolLbC2lHuwqIyGVAbBU9jxZLUK0DZzEuXUX6zU0BmMkkZTHKQt1f66//tUZOkB8XkhWGHsEkwfQspgMeMYBYyBXaeYTKiRiGkA95gpYDCOgBQdAAAsdH5lD5qMlVQEHWA21goBeCSZDNiOvnGFk3YKpxUI60nP8QP9vBRBAAADTXaYBwHqumRbiZP4Tr2GYhSsFqw3tUiNWRLgo2Q4IF7QxFAAKD0K6YJMLls7TtbxDzFZR0JXAuJ8IhxedvCjHtXmYlN3Y3lDl0XHiIEZOw344YGQrgZmlx+G/Kmr1XCKTJKMKBM84ULB//tUZOcBEW0hVGnmEzggwgpAPYYYRXBfWSekZ3B8BOnkliAgpkd9y31VyXmLSStgALdZblHXLnWlOzOOYLgoNrQbc4kEKEUq4G520ajzG6ue/kN9toZk3dVISiJAAAM+Mu3SkZurWEhopGQ1WdMO5pjS4JNSotWzlt7miQy8SHwSRoScqcIItfAq8iNC4lk1Vmu0iOEM/KTw6Uvmd+6I7MfJIMQAWyrCdSYuYLGInRQkjWx9cEKPrUbPBbEuuFY8//tUZOiB8XISUdMPMFAlIfoQYSIsRKhVZaSETjB/h+iAwYHQ5/v2RFULgAMAATaE/LGb/ME6j+RwqeFEdLmSP71U/v8McKXnmd3RqShlJwo7aUwlSiABUABYtx1K8MYkjw0YIhsMSk2+umZWkqCQsYQtR4O+LhreokrxqiAA0uePgKVrapCapYMxhGugalCAwE29QG0vVpBWCL6BtZ/5FVAB4SLhZVkQWADlEjWJV/hagmQMjThZGYLryt7qm1UI//tUZOoBcXwh0mnpEWojwtoFPYMMRXxxQUeYTMCICmfA9gyhQAVgFjSGDSwWBEymN0sMK8pqJAIls5TEt9b+7VssSeIVB0NSX+p4IFAhCgGGMBEsdJHgEiRMyjUahwNULPREeEMRCVlazsSsdErOWeFSJ4f+oECACRp1YGJHwWFxGZATeKihJ9bcV8WFWLFWaxUkaAoVFA8/6hci4BKZhUUEhoCioYSGvhUUEhp/xdn6hfizMFhcj+AhcVMqTEFN//tUZOcBEWQiUmMJEiglwVptPSZBBNBhNgewyECAhKeU8zBRRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//tUZOiBEVgcTuHsEkgpYVnMPOkQBIRRLKWwYYB8haZU9JgAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//tUZOqMAT0VR5EvMoAq4WlJDAYyBfwS1kCEYEBcAF2AIYwAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+  cat: "data:audio/mp3;base64,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",
+  dog: "data:audio/mp3;base64,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",
+  monkey: "data:audio/mp3;base64,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",
+  rabbit: "data:audio/mp3;base64,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",
+};
+
+// 预加载缓存：把 base64 转成可重复播放的 Audio 对象
+const REAL_SOUND_CACHE = {};
+Object.keys(REAL_SOUNDS).forEach(k => {
+  REAL_SOUND_CACHE[k] = new Audio(REAL_SOUNDS[k]);
+  REAL_SOUND_CACHE[k].preload = 'auto';
+});
+
+class SoundManager {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+  play(type) {
+    if (!this.enabled) return;
+    try {
+      this.init();
+      const ctx = this.ctx;
+      const now = ctx.currentTime;
+
+      if (type === 'click') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain).connect(ctx.destination);
+        osc.frequency.value = 800;
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        gain.gain.value = 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'success') {
+        // 上行三音
+        [523, 659, 784].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain).connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.value = 0;
+          gain.gain.linearRampToValueAtTime(0.2, now + i * 0.1 + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.2);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 0.2);
+        });
+      } else if (type === 'unlock') {
+        // 闪亮的解锁音
+        [659, 784, 1047, 1319].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain).connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.value = 0;
+          gain.gain.linearRampToValueAtTime(0.15, now + i * 0.08 + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.3);
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.3);
+        });
+      } else if (type === 'pop') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain).connect(ctx.destination);
+        osc.frequency.value = 400;
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+        gain.gain.value = 0.1;
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    } catch(e) { console.warn('audio error', e); }
+  }
+
+  // 播放动物 / 水果叫声（优先真实音频，否则合成）
+  playCritterSound(id) {
+    if (!this.enabled) return;
+
+    // 1. 优先用真实音频
+    if (REAL_SOUND_CACHE[id]) {
+      try {
+        const audio = REAL_SOUND_CACHE[id];
+        audio.currentTime = 0;
+        audio.volume = 0.85;
+        const playPromise = audio.play();
+        if (playPromise) playPromise.catch(() => {});
+        return;
+      } catch(e) { console.warn('real sound error', e); }
+    }
+
+    // 2. 回退到 Web Audio 合成
+    try {
+      this.init();
+      const ctx = this.ctx;
+      const now = ctx.currentTime;
+
+      const cfg = CRITTER_SOUNDS[id];
+      if (!cfg) return;
+
+      cfg.notes.forEach((note, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        osc.connect(filter).connect(gain).connect(ctx.destination);
+
+        osc.type = note.wave || cfg.wave || 'sawtooth';
+        filter.type = 'lowpass';
+        filter.frequency.value = note.filter || cfg.filter || 2000;
+
+        const tStart = now + (note.t || i * (cfg.gap || 0.15));
+        const dur = note.d || cfg.dur || 0.2;
+
+        osc.frequency.setValueAtTime(note.f, tStart);
+        if (note.f2) osc.frequency.exponentialRampToValueAtTime(note.f2, tStart + dur);
+
+        gain.gain.setValueAtTime(0, tStart);
+        gain.gain.linearRampToValueAtTime(cfg.vol || 0.2, tStart + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, tStart + dur);
+
+        osc.start(tStart);
+        osc.stop(tStart + dur + 0.05);
+      });
+    } catch(e) { console.warn('critter sound', e); }
+  }
+}
+
+// 各角色的"叫声"参数（用 Web Audio 合成模拟）
+const CRITTER_SOUNDS = {
+  // 🐶 汪汪 —— 短促两声
+  dog: { wave: 'sawtooth', vol: 0.18, filter: 1500,
+    notes: [
+      { f: 350, f2: 200, d: 0.18, t: 0 },
+      { f: 380, f2: 220, d: 0.18, t: 0.25 },
+    ] },
+  // 🐱 喵 —— 上行长音
+  cat: { wave: 'triangle', vol: 0.18, filter: 2500,
+    notes: [{ f: 500, f2: 800, d: 0.5, t: 0 }] },
+  // 🐰 蹦蹦 —— 弹跳音
+  rabbit: { wave: 'sine', vol: 0.2, filter: 3000,
+    notes: [
+      { f: 800, f2: 1200, d: 0.1, t: 0 },
+      { f: 800, f2: 1200, d: 0.1, t: 0.18 },
+      { f: 800, f2: 1200, d: 0.1, t: 0.36 },
+    ] },
+  // 🐻 吼 —— 低频长音
+  bear: { wave: 'sawtooth', vol: 0.22, filter: 600,
+    notes: [{ f: 120, f2: 80, d: 0.6, t: 0 }] },
+  // 🦁 吼吼吼 —— 强烈低频
+  lion: { wave: 'sawtooth', vol: 0.25, filter: 700,
+    notes: [
+      { f: 150, f2: 80, d: 0.4, t: 0 },
+      { f: 130, f2: 70, d: 0.5, t: 0.45 },
+    ] },
+  // 🐵 吱吱 —— 高频快速
+  monkey: { wave: 'square', vol: 0.15, filter: 4000,
+    notes: [
+      { f: 1200, f2: 1500, d: 0.08, t: 0 },
+      { f: 1200, f2: 1500, d: 0.08, t: 0.13 },
+      { f: 1300, f2: 1600, d: 0.08, t: 0.26 },
+      { f: 1100, f2: 1400, d: 0.08, t: 0.39 },
+    ] },
+  // 🐘 嗷 —— 长低频喇叭声
+  elephant: { wave: 'sawtooth', vol: 0.25, filter: 800,
+    notes: [{ f: 180, f2: 350, d: 0.7, t: 0 }] },
+  // 🐼 哼哼
+  panda: { wave: 'triangle', vol: 0.2, filter: 1000,
+    notes: [
+      { f: 250, f2: 200, d: 0.25, t: 0 },
+      { f: 250, f2: 200, d: 0.25, t: 0.35 },
+    ] },
+
+  // 🍎 苹果 —— 咔嚓
+  apple: { wave: 'square', vol: 0.15, filter: 1500,
+    notes: [
+      { f: 200, f2: 100, d: 0.05, t: 0 },
+      { f: 800, f2: 400, d: 0.08, t: 0.07, filter: 3000 },
+    ] },
+  // 🍌 香蕉 —— 滑溜溜
+  banana: { wave: 'sine', vol: 0.18, filter: 2000,
+    notes: [{ f: 400, f2: 700, d: 0.4, t: 0 }] },
+  // 🍉 西瓜 —— 咕咚
+  watermelon: { wave: 'sine', vol: 0.22, filter: 800,
+    notes: [
+      { f: 200, f2: 100, d: 0.2, t: 0 },
+      { f: 180, f2: 90, d: 0.2, t: 0.28 },
+    ] },
+  // 🍇 葡萄 —— 噗噗
+  grape: { wave: 'triangle', vol: 0.15, filter: 1200,
+    notes: [
+      { f: 350, f2: 250, d: 0.1, t: 0 },
+      { f: 380, f2: 280, d: 0.1, t: 0.15 },
+      { f: 400, f2: 300, d: 0.1, t: 0.3 },
+    ] },
+  // 🍓 草莓 —— 甜甜
+  strawberry: { wave: 'sine', vol: 0.2, filter: 3000,
+    notes: [
+      { f: 800, f2: 1000, d: 0.15, t: 0 },
+      { f: 1000, f2: 1200, d: 0.15, t: 0.18 },
+    ] },
+  // 🍊 橙子 —— 嗞嗞
+  orange: { wave: 'sawtooth', vol: 0.13, filter: 3500,
+    notes: [{ f: 1500, f2: 2500, d: 0.4, t: 0 }] },
+
+  // ═════════════ 交通工具音效 ═════════════
+
+  // 🚗 小汽车 —— 滴滴
+  car: { wave: 'square', vol: 0.18, filter: 1200,
+    notes: [
+      { f: 600, f2: 600, d: 0.15, t: 0 },
+      { f: 600, f2: 600, d: 0.15, t: 0.22 },
+    ] },
+
+  // 🚂 火车 —— 呜呜（长汽笛）
+  train: { wave: 'sawtooth', vol: 0.22, filter: 800,
+    notes: [
+      { f: 220, f2: 180, d: 0.4, t: 0 },
+      { f: 200, f2: 160, d: 0.5, t: 0.5 },
+    ] },
+
+  // ✈️ 飞机 —— 引擎轰鸣
+  plane: { wave: 'sawtooth', vol: 0.2, filter: 600,
+    notes: [
+      { f: 80, f2: 200, d: 1.0, t: 0 },
+    ] },
+
+  // 🚢 船 —— 低沉汽笛
+  boat: { wave: 'sine', vol: 0.25, filter: 400,
+    notes: [
+      { f: 100, f2: 80, d: 0.8, t: 0 },
+    ] },
+
+  // 🚲 自行车 —— 叮铃叮铃
+  bike: { wave: 'sine', vol: 0.18, filter: 4000,
+    notes: [
+      { f: 1500, f2: 1800, d: 0.15, t: 0 },
+      { f: 1500, f2: 1800, d: 0.15, t: 0.2 },
+      { f: 1500, f2: 1800, d: 0.15, t: 0.4 },
+    ] },
+
+  // 🚌 公交车 —— 嘟嘟嘟
+  bus: { wave: 'square', vol: 0.18, filter: 1000,
+    notes: [
+      { f: 350, f2: 350, d: 0.2, t: 0 },
+      { f: 350, f2: 350, d: 0.2, t: 0.3 },
+    ] },
+
+  // 🚒 消防车 —— 嗡呜嗡呜（警笛）
+  fire_truck: { wave: 'sine', vol: 0.2, filter: 2000,
+    notes: [
+      { f: 800, f2: 1200, d: 0.25, t: 0 },
+      { f: 1200, f2: 800, d: 0.25, t: 0.27 },
+      { f: 800, f2: 1200, d: 0.25, t: 0.55 },
+      { f: 1200, f2: 800, d: 0.25, t: 0.82 },
+    ] },
+
+  // 🚓 警车 —— 哔哔哔（高频警笛）
+  police_car: { wave: 'square', vol: 0.18, filter: 3000,
+    notes: [
+      { f: 1100, f2: 1400, d: 0.2, t: 0 },
+      { f: 1400, f2: 1100, d: 0.2, t: 0.22 },
+      { f: 1100, f2: 1400, d: 0.2, t: 0.45 },
+      { f: 1400, f2: 1100, d: 0.2, t: 0.67 },
+    ] },
+};
+const sound = new SoundManager();
+
+// ============================================
+// 状态持久化
+// ============================================
+const STORAGE_KEY = 'kidquest_v3';
+const loadState = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // 旧版本兼容：补齐缺字段
+      const merged = {
+        companion: null,
+        companionName: '',
+        companionFed: 0,
+        companionMood: 80,
+        lastVisitDate: null,
+        lastDailyDate: null,
+        equippedAccessories: [],
+        unlockedAchievements: [],
+        ...parsed,
+      };
+      // 补齐 transport progress
+      if (!merged.progress.transport) {
+        merged.progress = { ...merged.progress, transport: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } } };
+      }
+      return merged;
+    }
+  } catch(e) {}
+  return {
+    progress: {
+      animals: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
+      fruits: { stars: { 1: 0, 2: 0, 3: 0, 4: 0 } },
+      transport: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
+    },
+    collected: [],
+    berries: 0,
+    lastDailyDate: null,
+    // 伙伴系统
+    companion: null, // 未选择
+    companionName: '',
+    companionFed: 0, // 累计喂食数
+    companionMood: 80, // 心情值 0-100
+    lastVisitDate: null, // 上次访问日期，用于心情衰减
+    equippedAccessories: [], // 已佩戴饰品 id 数组
+    unlockedAchievements: [], // 已解锁徽章 id 数组
+  };
+};
+const saveState = (state) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+};
+
+// ============================================
+// 通用组件
+// ============================================
+const Cloud = ({ x, y, scale = 1, delay = 0 }) => (
+  <div className="absolute pointer-events-none" style={{ left: x, top: y, transform: `scale(${scale})`, animation: `float-slow 6s ease-in-out infinite`, animationDelay: `${delay}s` }}>
+    <div className="relative">
+      <div className="absolute w-16 h-10 bg-white rounded-full opacity-90" style={{ left: 0, top: 5 }}/>
+      <div className="absolute w-14 h-12 bg-white rounded-full opacity-90" style={{ left: 18, top: 0 }}/>
+      <div className="absolute w-12 h-8 bg-white rounded-full opacity-90" style={{ left: 35, top: 8 }}/>
+    </div>
+  </div>
+);
+
+const Sun = () => (
+  <div className="absolute top-8 right-8 pointer-events-none animate-float-slow">
+    <div className="relative w-20 h-20">
+      <div className="absolute inset-0 bg-yellow-300 rounded-full" style={{ boxShadow: '0 0 40px rgba(255, 220, 100, 0.8)' }}/>
+      <div className="absolute" style={{ left: 22, top: 30, width: 8, height: 8, background: '#333', borderRadius: '50%' }}/>
+      <div className="absolute" style={{ right: 22, top: 30, width: 8, height: 8, background: '#333', borderRadius: '50%' }}/>
+      <div className="absolute" style={{ left: 30, top: 48, width: 20, height: 8, borderBottom: '3px solid #333', borderRadius: '0 0 100% 100%' }}/>
+    </div>
+  </div>
+);
+
+// 庆祝彩纸
+const Confetti = ({ active }) => {
+  if (!active) return null;
+  const pieces = Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    color: ['#FF8FA3', '#FFD93D', '#95E06C', '#54B3D6', '#B8A4DD'][i % 5],
+    delay: Math.random() * 0.3,
+  }));
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50">
+      {pieces.map(p => (
+        <div key={p.id} className="absolute top-0 w-3 h-3 rounded-sm"
+          style={{
+            left: `${p.left}%`,
+            background: p.color,
+            animation: `confetti 1.5s ease-in forwards`,
+            animationDelay: `${p.delay}s`,
+          }}/>
+      ))}
+    </div>
+  );
+};
+
+// ============================================
+// 首页：岛屿地图
+// ============================================
+const HomeScreen = ({ state, onIslandClick, onParentMode, onOpenDex, onOpenCompanion, onOpenAchievements }) => {
+  const totalCollected = state.collected.length;
+  const companionLine = getCompanionLine(totalCollected);
+  const stage = state.companion ? getGrowthStage(state.companionFed) : null;
+
+  return (
+    <div className="w-full h-full relative overflow-hidden" style={{
+      background: 'linear-gradient(180deg, #FFD9B0 0%, #FFB7D5 35%, #A8D8F5 70%, #5FA8DC 100%)'
+    }}>
+      <Sun />
+      <Cloud x="8%" y="12%" scale={1} delay={0} />
+      <Cloud x="55%" y="6%" scale={0.8} delay={1.5} />
+      <Cloud x="30%" y="18%" scale={0.6} delay={3} />
+
+      {/* 蝴蝶飞过 */}
+      <div className="absolute pointer-events-none animate-float" style={{ top: '20%', left: '40%' }}>
+        <div className="text-3xl">🦋</div>
+      </div>
+
+      {/* 标题 */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="bg-white/90 rounded-full px-6 py-2 shadow-lg">
+          <h1 className="font-fun text-2xl text-pink-500 text-center">🌈 小铭奇遇记</h1>
+        </div>
+      </div>
+
+      {/* 顶部状态栏：果子和图鉴数 */}
+      <div className="absolute top-20 left-4 right-4 flex justify-between z-10">
+        <div className="bg-white/90 rounded-full px-3 py-1.5 shadow flex items-center gap-1">
+          <span className="text-xl">🍓</span>
+          <span key={state.berries} className="font-bold text-pink-600 inline-block"
+            style={{ animation: 'count-pop 0.4s ease-out' }}>×{state.berries}</span>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => { sound.play('click'); onOpenAchievements(); }}
+            className="bg-white/90 w-10 h-10 rounded-full shadow flex items-center justify-center btn-press">
+            <span className="text-lg">🏅</span>
+          </button>
+          <button onClick={onParentMode} className="bg-white/70 w-10 h-10 rounded-full shadow flex items-center justify-center btn-press">
+            <span className="text-lg">⚙️</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 岛屿网格 */}
+      <div className="absolute inset-0 flex items-center justify-center pt-24 pb-32">
+        <div className="grid grid-cols-2 gap-4 w-full px-6 max-w-md">
+          {ISLANDS.map((island, idx) => {
+            const unlocked = isIslandUnlocked(island, state);
+            return (
+              <IslandCard
+                key={island.id}
+                island={{ ...island, unlocked }}
+                progress={state.progress[island.id]}
+                onClick={() => onIslandClick({ ...island, unlocked })}
+                delay={idx * 0.1}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 底部伙伴 + 图鉴入口 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white/95 rounded-t-3xl shadow-2xl">
+        <div className="px-4 pt-3 pb-4 flex items-center gap-3">
+          {/* 伙伴 */}
+          <button className="relative btn-press"
+            onClick={() => { sound.play('click'); onOpenCompanion(); }}>
+            <div className="animate-wiggle" style={{ transform: state.companion ? `scale(${stage.size + 0.3})` : '1' }}>
+              {state.companion ? <CritterWithAccessories id={state.companion} size={64} equipped={state.equippedAccessories || []}/> : <span className="text-6xl">🐻</span>}
+            </div>
+            <div className="absolute -top-2 -right-2 bg-yellow-100 border-2 border-yellow-400 rounded-2xl px-2 py-1 text-xs whitespace-nowrap shadow max-w-[140px]">
+              <div className="text-gray-700 truncate">{companionLine}</div>
+            </div>
+          </button>
+
+          {/* 图鉴入口 */}
+          <button className="flex-1 bg-gradient-to-r from-amber-200 to-orange-200 rounded-2xl p-3 btn-press border-2 border-amber-400 shadow"
+            onClick={() => { sound.play('click'); onOpenDex(); }}>
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">📖</span>
+              <div className="text-left">
+                <div className="font-bold text-amber-800">我的图鉴</div>
+                <div className="text-xs text-amber-700">已收集 {totalCollected}/22</div>
+                <div className="mt-1 h-1.5 bg-white/70 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-400 rounded-full" style={{ width: `${(totalCollected/22)*100}%` }}/>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const IslandCard = ({ island, progress, onClick, delay }) => {
+  const totalLevels = island.levels.length;
+  const completedLevels = progress ? Object.values(progress.stars).filter(s => s > 0).length : 0;
+  const totalStars = progress ? Object.values(progress.stars).reduce((a,b) => a+b, 0) : 0;
+  const maxStars = totalLevels * 3;
+
+  return (
+    <button
+      className={`relative rounded-3xl p-3 btn-press shadow-xl animate-pop-in ${island.unlocked ? '' : 'opacity-70'}`}
+      style={{
+        background: `linear-gradient(135deg, ${island.bgFrom}, ${island.bgTo})`,
+        animationDelay: `${delay}s`,
+      }}
+      onClick={() => { sound.play('click'); onClick(); }}
+      disabled={!island.unlocked}
+    >
+      {/* 主图标 */}
+      <div className="text-5xl mb-1 animate-float" style={{ animationDelay: `${delay}s` }}>
+        {island.unlocked ? island.emoji : '🔒'}
+      </div>
+
+      {/* 名字 */}
+      <div className="font-fun text-lg text-white drop-shadow font-bold">
+        {island.name}
+      </div>
+
+      {/* 进度 */}
+      {island.unlocked ? (
+        <div className="mt-1">
+          <div className="text-xs text-white/90">
+            {completedLevels}/{totalLevels} 关
+          </div>
+          <div className="flex gap-0.5 mt-1 justify-center">
+            {[1,2,3].map(n => (
+              <span key={n} className="text-xs">
+                {totalStars >= maxStars * n / 3 ? '⭐' : '☆'}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-xs text-white/80 mt-1 px-1">
+          {island.unlockHint}
+        </div>
+      )}
+
+      {/* NPC 角标 */}
+      {island.unlocked && (
+        <div className="absolute -top-2 -right-2 bg-white rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-2 border-yellow-300">
+          <span className="text-xl">{island.npc}</span>
+        </div>
+      )}
+    </button>
+  );
+};
+
+// ============================================
+// 岛屿页：关卡列表
+// ============================================
+const IslandScreen = ({ island, state, onBack, onLevelClick }) => {
+  const progress = state.progress[island.id] || { stars: {} };
+
+  return (
+    <div className="w-full h-full relative overflow-hidden" style={{
+      background: `linear-gradient(180deg, ${island.bgFrom} 0%, ${island.bgTo} 100%)`
+    }}>
+      {/* 装饰云 */}
+      <Cloud x="10%" y="8%" scale={0.7} delay={0} />
+      <Cloud x="65%" y="12%" scale={0.5} delay={1} />
+
+      {/* 顶部 */}
+      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+        <button onClick={() => { sound.play('pop'); onBack(); }}
+          className="bg-white/90 w-12 h-12 rounded-full shadow-lg btn-press flex items-center justify-center">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="bg-white/90 rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+          <span className="text-2xl">{island.emoji}</span>
+          <span className="font-fun text-xl text-gray-700">{island.name}</span>
+        </div>
+        <div className="w-12"/>
+      </div>
+
+      {/* NPC 引导 */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 flex items-end gap-3 animate-pop-in">
+        <div className="text-7xl animate-float">{island.npc}</div>
+        <div className="bg-white rounded-2xl px-4 py-2 mb-3 shadow-lg relative">
+          <div className="absolute left-0 bottom-3 -translate-x-2 w-0 h-0"
+            style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: '10px solid white' }}/>
+          <div className="text-sm text-gray-600">我是 {island.npcName}</div>
+          <div className="font-bold text-gray-800">来帮我闯关吧！</div>
+        </div>
+      </div>
+
+      {/* 关卡列表 */}
+      <div className="absolute top-56 bottom-4 left-0 right-0 px-6 overflow-y-auto scroll-area">
+        <div className="grid grid-cols-2 gap-3 pb-4">
+          {island.levels.map((level, idx) => (
+            <LevelCard
+              key={level.id}
+              level={level}
+              stars={progress.stars[level.id] || 0}
+              onClick={() => onLevelClick(level)}
+              delay={idx * 0.08}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LevelCard = ({ level, stars, onClick, delay }) => {
+  const typeIcons = {
+    recognize: '👀',
+    find: '🔍',
+    sound: '🔊',
+    shadow: '👥',
+    count: '🔢',
+    match: '🎯',
+    mixed: '🎉',
+  };
+  const isPerfect = stars === 3;
+  const isStarted = stars > 0;
+
+  return (
+    <button
+      onClick={() => { sound.play('click'); onClick(); }}
+      className={`rounded-3xl p-4 btn-press shadow-lg animate-pop-in border-4 transition relative
+        ${isPerfect ? 'bg-gradient-to-br from-yellow-100 to-orange-100 border-amber-300'
+          : 'bg-white border-white'}`}
+      style={{ animationDelay: `${delay}s` }}>
+      {/* 完美徽章 */}
+      {isPerfect && (
+        <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">
+          <span className="text-sm">💎</span>
+        </div>
+      )}
+      <div className="flex items-center justify-between mb-2">
+        <div className={`rounded-full w-9 h-9 flex items-center justify-center font-bold
+          ${isPerfect ? 'bg-amber-200 text-amber-700' : 'bg-pink-100 text-pink-600'}`}>
+          {level.id}
+        </div>
+        <div className="text-2xl">{typeIcons[level.type] || '🎮'}</div>
+      </div>
+      <div className="font-bold text-gray-800 text-left">{level.name}</div>
+      <div className="flex gap-1 mt-2">
+        {[1,2,3].map(n => (
+          <span key={n} className={`text-lg transition ${stars >= n ? '' : 'opacity-25 grayscale'}`}>⭐</span>
+        ))}
+      </div>
+      {/* 状态行 */}
+      {isStarted && !isPerfect && (
+        <div className="text-[10px] text-amber-700 mt-1 font-bold">⚡ 再加把劲！</div>
+      )}
+      {!isStarted && (
+        <div className="text-[10px] text-gray-400 mt-1">👶 还没玩过</div>
+      )}
+      {isPerfect && (
+        <div className="text-[10px] text-orange-600 mt-1 font-bold">💎 满星啦！</div>
+      )}
+    </button>
+  );
+};
+
+// ============================================
+// 语音引导（Web Speech API）
+// ============================================
+let speechReady = false;
+const speak = (text) => {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 0.9;
+    u.pitch = 1.2; // 偏高，更童趣
+    window.speechSynthesis.speak(u);
+    speechReady = true;
+  } catch(e) {}
+};
+
+// ============================================
+// 工具：洗牌、随机选 N 个、生成题目
+// ============================================
+const shuffle = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+const pickN = (arr, n) => shuffle(arr).slice(0, n);
+
+// 生成一关的题目数组
+// 每次进入都是新的随机组合 → 复玩有新鲜感
+const generateQuestions = (level, islandItems) => {
+  const itemMap = Object.fromEntries(islandItems.map(i => [i.id, i]));
+  const allItems = islandItems;
+  // 每次随机洗牌池，保证多次玩有不同顺序
+  const poolItems = shuffle(level.pool.map(id => itemMap[id]));
+
+  // 主类型生成，mixed 类型每题随机一种
+  const NUM_QUESTIONS = level.type === 'mixed' ? 4 : 3;
+  const questions = [];
+
+  for (let i = 0; i < NUM_QUESTIONS; i++) {
+    const t = level.type === 'mixed'
+      ? ['recognize', 'find', 'sound', 'shadow', 'count'][Math.floor(Math.random() * 5)]
+      : level.type;
+
+    // 目标在 pool 内随机循环，但不重复出现
+    const target = poolItems[i % poolItems.length];
+
+    if (t === 'recognize') {
+      questions.push({
+        type: 'recognize',
+        target,
+        hint: `这是${target.name}`,
+      });
+    } else if (t === 'find' || t === 'sound' || t === 'shadow' || t === 'match') {
+      const distractors = pickN(allItems.filter(x => x.id !== target.id), 3);
+      const options = shuffle([target, ...distractors]);
+      questions.push({
+        type: t,
+        target,
+        options,
+        hint: t === 'sound' ? `听一听，是哪个？` :
+              t === 'shadow' ? `这个影子是谁？` :
+              t === 'match' ? `找到一样的` :
+              `找出${target.name}`,
+      });
+    } else if (t === 'count') {
+      const count = Math.floor(Math.random() * 4) + 1; // 1-4
+      const choices = shuffle([count, count + 1, Math.max(1, count - 1), Math.min(5, count + 2)]);
+      questions.push({
+        type: 'count',
+        target,
+        count,
+        options: [...new Set(choices)].slice(0, 4),
+        hint: `数一数，有几个${target.name}？`,
+      });
+    }
+  }
+
+  return questions;
+};
+
+// ============================================
+// 关卡引擎
+// ============================================
+const LevelScreen = ({ island, level, onBack, onComplete }) => {
+  const [questions] = useState(() => generateQuestions(level, island.items));
+  const [qIdx, setQIdx] = useState(0);
+  const [feedback, setFeedback] = useState(null); // 'right' | 'wrong'
+  const [wrongCount, setWrongCount] = useState(0);
+  const [shake, setShake] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
+  const [showPerfect, setShowPerfect] = useState(false);
+  const [idleHint, setIdleHint] = useState(false);
+
+  const q = questions[qIdx];
+  const progress = ((qIdx) / questions.length) * 100;
+
+  // 进入题目时自动朗读
+  useEffect(() => {
+    if (!q) return;
+    setFeedback(null);
+    setIdleHint(false);
+    const timer = setTimeout(() => {
+      speak(q.hint);
+      if (q.type === 'recognize' || q.type === 'sound') {
+        setTimeout(() => sound.playCritterSound(q.target.id), 1000);
+      }
+    }, 300);
+    // 5 秒未操作 → 显示提示动画
+    const idleTimer = setTimeout(() => {
+      setIdleHint(true);
+    }, 5500);
+    return () => { clearTimeout(timer); clearTimeout(idleTimer); };
+  }, [qIdx]);
+
+  if (!q) return null;
+
+  const handleAnswer = (chosen) => {
+    if (feedback) return;
+    setIdleHint(false);
+
+    let correct = false;
+    if (q.type === 'recognize') {
+      correct = true;
+    } else if (q.type === 'count') {
+      correct = chosen === q.count;
+    } else {
+      correct = chosen.id === q.target.id;
+    }
+
+    if (correct) {
+      sound.play('success');
+      setFeedback('right');
+      setShowSparkles(true);
+      speak(q.type === 'recognize' ? `你认识${q.target.name}啦` : pickRightPhrase());
+
+      setTimeout(() => {
+        setShowSparkles(false);
+        if (qIdx + 1 < questions.length) {
+          setQIdx(qIdx + 1);
+        } else {
+          // 关卡结束
+          const stars = wrongCount <= 1 ? 3 : wrongCount === 2 ? 2 : 1;
+          // 完美关卡：全对，弹"完美"特效
+          if (wrongCount === 0) {
+            setShowPerfect(true);
+            sound.play('unlock');
+            setTimeout(() => {
+              setShowPerfect(false);
+              onComplete(island.id, level.id, stars);
+            }, 2500);
+          } else {
+            setTimeout(() => onComplete(island.id, level.id, stars), 600);
+          }
+        }
+      }, 1400);
+    } else {
+      sound.play('pop');
+      setFeedback('wrong');
+      setShake(true);
+      setWrongCount(c => c + 1);
+      speak(pickRetryPhrase());
+      setTimeout(() => {
+        setShake(false);
+        setFeedback(null);
+      }, 800);
+    }
+  };
+
+  return (
+    <div className="w-full h-full relative overflow-hidden flex flex-col"
+      style={{ background: `linear-gradient(180deg, ${island.bgFrom}, ${island.bgTo})` }}>
+
+      {/* 顶部：返回 + 进度条 */}
+      <div className="absolute top-4 left-4 right-4 flex items-center gap-3 z-20">
+        <button onClick={() => { sound.play('pop'); onBack(); }}
+          className="bg-white/90 w-11 h-11 rounded-full shadow-lg btn-press flex items-center justify-center flex-shrink-0">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="flex-1 bg-white/40 rounded-full h-4 overflow-hidden shadow-inner">
+          <div className="h-full bg-gradient-to-r from-yellow-300 to-pink-400 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}/>
+        </div>
+        <div className="bg-white/90 rounded-full px-3 h-11 flex items-center font-bold text-gray-700 text-sm">
+          {qIdx + 1}/{questions.length}
+        </div>
+      </div>
+
+      {/* 题目区 */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pt-20 pb-4">
+
+        {/* 提示气泡 */}
+        <div className="bg-white rounded-2xl px-5 py-3 shadow-lg mb-4 flex items-center gap-2 animate-pop-in">
+          <button onClick={() => speak(q.hint)} className="text-2xl btn-press">🔊</button>
+          <span className="font-bold text-gray-800">{q.hint}</span>
+        </div>
+
+        {/* 题目主体 */}
+        <div className="flex-1 w-full flex items-center justify-center">
+          <QuestionView q={q} feedback={feedback} shake={shake} showSparkles={showSparkles} onAnswer={handleAnswer}/>
+        </div>
+
+        {/* 空闲提示气泡（5秒未操作） */}
+        {idleHint && !feedback && (
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-yellow-100 border-2 border-yellow-400 rounded-2xl px-4 py-2 shadow-lg animate-pop-in">
+            <button onClick={() => speak(q.hint)} className="text-sm font-bold text-amber-800">
+              👆 试一试看，再听一次？
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 完美关卡特效覆盖层 */}
+      {showPerfect && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none bg-gradient-to-b from-yellow-300/40 to-orange-300/40 animate-pop-in">
+          <Confetti active={true}/>
+          <div className="text-center">
+            <div className="font-fun text-6xl text-orange-600 drop-shadow-lg animate-pop-in"
+              style={{ textShadow: '0 0 20px rgba(255, 215, 0, 0.8)' }}>
+              ⭐ 完美！⭐
+            </div>
+            <div className="font-bold text-2xl text-orange-700 mt-2 animate-pop-in" style={{ animationDelay: '0.3s' }}>
+              全部答对啦！
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 渲染不同类型的题目
+const QuestionView = ({ q, feedback, shake, showSparkles, onAnswer }) => {
+
+  // —— 单图认识 ——
+  if (q.type === 'recognize') {
+    return (
+      <div className="text-center">
+        <div className="relative inline-block">
+          <button onClick={() => { sound.playCritterSound(q.target.id); }}
+            className={`btn-press ${feedback === 'right' ? 'animate-wiggle' : 'animate-float'}`}>
+            <Critter id={q.target.id} size={180}/>
+          </button>
+          {showSparkles && <Sparkles/>}
+        </div>
+        <div className="font-fun text-4xl text-white drop-shadow-lg mt-4 animate-pop-in">
+          {q.target.name}
+        </div>
+        <div className="text-sm text-white/90 mt-1 font-bold">👆 点点它，听它说话</div>
+        <button onClick={() => onAnswer(q.target)}
+          className="mt-4 bg-white px-8 py-3 rounded-full font-bold text-pink-500 shadow-lg btn-press text-lg animate-pulse-soft">
+          我认识啦 ✨
+        </button>
+      </div>
+    );
+  }
+
+  // —— 找图 / 听声 / 影子 / 配对：4 选 1 ——
+  if (['find', 'sound', 'shadow', 'match'].includes(q.type)) {
+    return (
+      <div className="w-full max-w-md">
+        {/* 题干图标 */}
+        <div className="text-center mb-4">
+          {q.type === 'sound' && (
+            <button onClick={() => { sound.playCritterSound(q.target.id); }}
+              className="text-7xl bg-white/90 rounded-full w-28 h-28 inline-flex items-center justify-center shadow-lg btn-press animate-pulse-soft">
+              🔊
+            </button>
+          )}
+          {q.type === 'shadow' && (
+            <div className="inline-block animate-float">
+              <Critter id={q.target.id} size={140} shadow/>
+            </div>
+          )}
+          {q.type === 'match' && (
+            <div className="inline-block animate-float">
+              <Critter id={q.target.id} size={120}/>
+            </div>
+          )}
+        </div>
+
+        {/* 4 个选项 */}
+        <div className={`grid grid-cols-2 gap-3 ${shake ? 'animate-shake' : ''}`}>
+          {q.options.map((opt, i) => {
+            const isRight = feedback === 'right' && opt.id === q.target.id;
+            return (
+              <button key={opt.id}
+                onClick={() => { sound.playCritterSound(opt.id); onAnswer(opt); }}
+                className={`bg-white rounded-3xl p-3 shadow-lg btn-press transition-all border-4 animate-pop-in
+                  ${isRight ? 'border-green-400 bg-green-50 scale-110' : 'border-white'}`}
+                style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className={`flex justify-center ${isRight ? 'animate-wiggle' : ''}`}>
+                  <Critter id={opt.id} size={80}/>
+                </div>
+                <div className="font-bold text-gray-700 mt-1">{opt.name}</div>
+                {isRight && <Sparkles inline/>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // —— 数数 ——
+  if (q.type === 'count') {
+    const items = Array.from({ length: q.count });
+    return (
+      <div className="w-full max-w-md">
+        {/* 屏幕上的物体 */}
+        <div className="bg-white/40 rounded-3xl p-4 mb-4 min-h-[180px] relative shadow-inner">
+          <div className="flex flex-wrap gap-2 justify-center items-center">
+            {items.map((_, i) => (
+              <button key={i} onClick={() => sound.playCritterSound(q.target.id)}
+                className="animate-pop-in btn-press" style={{ animationDelay: `${i * 0.1}s` }}>
+                <Critter id={q.target.id} size={60}/>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 数字选项 */}
+        <div className={`grid grid-cols-2 gap-3 ${shake ? 'animate-shake' : ''}`}>
+          {q.options.map((n, i) => {
+            const isRight = feedback === 'right' && n === q.count;
+            return (
+              <button key={i} onClick={() => onAnswer(n)}
+                className={`bg-white rounded-3xl py-6 shadow-lg btn-press transition-all border-4 animate-pop-in
+                  ${isRight ? 'border-green-400 bg-green-50' : 'border-white'}`}
+                style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="font-fun text-5xl text-pink-500">{n}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// 答对的星星迸发效果
+const Sparkles = ({ inline }) => (
+  <div className={`${inline ? 'absolute inset-0 pointer-events-none' : 'absolute inset-0 pointer-events-none'}`}>
+    {['⭐', '✨', '🌟', '💫', '⭐', '✨', '🌟', '💖'].map((s, i) => (
+      <div key={i} className="absolute text-3xl"
+        style={{
+          left: `${10 + (i % 4) * 20 + Math.random() * 10}%`,
+          top: `${20 + (Math.floor(i / 4)) * 30 + Math.random() * 15}%`,
+          animation: 'star-burst 1s ease-out forwards',
+          animationDelay: `${i * 0.04}s`,
+        }}>
+        {s}
+      </div>
+    ))}
+  </div>
+);
+
+// ============================================
+// 通关庆祝
+// ============================================
+const WinModal = ({ stars, berries, newlyUnlocked, onClose }) => {
+  const [phrase] = useState(() => pickWinPhrase());
+  return (
+  <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 animate-slide-up">
+    <Confetti active={true} />
+    <div className="bg-white rounded-3xl p-6 mx-6 text-center animate-pop-in max-w-sm">
+      <div className="text-5xl mb-2">🎉</div>
+      <div className="font-fun text-2xl text-pink-500">{phrase}</div>
+      <div className="flex gap-2 justify-center my-3">
+        {[1,2,3].map(n => (
+          <span key={n} className={`text-4xl ${stars >= n ? 'animate-pop-in' : 'opacity-25 grayscale'}`}
+            style={{ animationDelay: `${n * 0.2}s` }}>
+            ⭐
+          </span>
+        ))}
+      </div>
+      {berries > 0 ? (
+        <div className="bg-pink-50 rounded-2xl px-4 py-1.5 inline-block">
+          <span className="text-xl">🍓</span>
+          <span className="font-bold text-pink-600 ml-1">+{berries}</span>
+        </div>
+      ) : (
+        <div className="bg-amber-50 rounded-2xl px-3 py-1.5 inline-block">
+          <span className="text-xs text-amber-700">这关已满星啦，挑战下一关！</span>
+        </div>
+      )}
+
+      {/* 新解锁图鉴 */}
+      {newlyUnlocked && newlyUnlocked.length > 0 && (
+        <div className="mt-4 p-3 bg-amber-50 rounded-2xl border-2 border-amber-200">
+          <div className="text-sm font-bold text-amber-700 mb-2">🎁 新朋友！</div>
+          <div className="flex justify-center gap-2 flex-wrap">
+            {newlyUnlocked.map((item, i) => (
+              <div key={item.id} className="bg-white rounded-xl p-2 shadow animate-pop-in"
+                style={{ animationDelay: `${0.3 + i * 0.15}s` }}>
+                <Critter id={item.id} size={50}/>
+                <div className="font-bold text-[11px] text-gray-700">{item.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button onClick={onClose}
+        className="mt-4 w-full bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold py-3 rounded-2xl btn-press shadow-lg">
+        继续冒险 →
+      </button>
+    </div>
+  </div>
+);
+};
+
+// ============================================
+// 图鉴页
+// ============================================
+const DexScreen = ({ state, onClose }) => {
+  const [flipped, setFlipped] = useState(null); // 当前翻开的 itemId
+  const [filter, setFilter] = useState('all'); // all | animals | fruits
+
+  // 收集所有 items
+  const allItems = ISLANDS.flatMap(island =>
+    island.items.map(item => ({ ...item, islandId: island.id, islandName: island.name }))
+  );
+
+  const filteredItems = filter === 'all' ? allItems
+    : allItems.filter(i => i.islandId === filter);
+
+  const collectedCount = state.collected.length;
+  const totalCount = allItems.length;
+  const progress = (collectedCount / totalCount) * 100;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #FFF3D6 0%, #FFE8C2 100%)' }}>
+
+      {/* 顶部 */}
+      <div className="bg-gradient-to-b from-amber-100 to-amber-50 shadow p-4 flex items-center gap-3">
+        <button onClick={() => { sound.play('pop'); onClose(); }}
+          className="w-11 h-11 rounded-full bg-white shadow btn-press flex items-center justify-center">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="flex-1">
+          <div className="font-fun text-xl text-amber-800">📖 我的图鉴</div>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 h-2 bg-amber-200 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-orange-400 to-amber-400 rounded-full transition-all"
+                style={{ width: `${progress}%` }}/>
+            </div>
+            <div className="text-xs font-bold text-amber-700">{collectedCount}/{totalCount}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 分类标签 */}
+      <div className="flex gap-2 px-4 py-3 overflow-x-auto scroll-area">
+        {[
+          { id: 'all', label: '全部', emoji: '🌟' },
+          { id: 'animals', label: '动物', emoji: '🐾' },
+          { id: 'fruits', label: '水果', emoji: '🍎' },
+          { id: 'transport', label: '交通', emoji: '🚗' },
+        ].map(tab => (
+          <button key={tab.id} onClick={() => { sound.play('click'); setFilter(tab.id); }}
+            className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition btn-press
+              ${filter === tab.id ? 'bg-amber-400 text-white shadow-lg' : 'bg-white text-amber-700 shadow'}`}>
+            {tab.emoji} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 卡片网格 */}
+      <div className="px-4 pb-4 overflow-y-auto scroll-area" style={{ height: 'calc(100% - 140px)' }}>
+        <div className="grid grid-cols-3 gap-3">
+          {filteredItems.map(item => {
+            const isCollected = state.collected.includes(item.id);
+            return (
+              <DexCard key={item.id} item={item} collected={isCollected}
+                isFlipped={flipped === item.id}
+                onClick={() => {
+                  if (!isCollected) { sound.play('pop'); return; }
+                  sound.play('click');
+                  setFlipped(flipped === item.id ? null : item.id);
+                }}/>
+            );
+          })}
+        </div>
+
+        {/* 空状态提示（一张都没解锁时）*/}
+        {collectedCount === 0 && (
+          <div className="mt-4 p-5 bg-amber-50 rounded-2xl border-2 border-dashed border-amber-300 text-center">
+            <div className="text-4xl mb-2">🔍</div>
+            <div className="font-bold text-amber-800">这里还空空的～</div>
+            <div className="text-xs text-amber-700 mt-1">去岛屿闯关，认识新朋友吧！</div>
+          </div>
+        )}
+
+        {/* 全部收集庆祝 */}
+        {collectedCount === totalCount && (
+          <div className="mt-6 bg-gradient-to-r from-yellow-300 to-orange-300 rounded-3xl p-5 text-center shadow-xl">
+            <div className="text-5xl mb-2">🏆</div>
+            <div className="font-fun text-2xl text-orange-900">百科小达人！</div>
+            <div className="text-sm text-orange-800 mt-1">恭喜你收集齐了全部图鉴 🎉</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// 单张图鉴卡（带翻面）
+const DexCard = ({ item, collected, isFlipped, onClick }) => {
+  return (
+    <button onClick={onClick}
+      className="aspect-[3/4] bg-white rounded-2xl shadow-lg p-2 flex flex-col items-center justify-center btn-press border-4 border-white relative overflow-hidden"
+      style={{ perspective: '1000px' }}>
+
+      <div className="w-full h-full relative transition-transform duration-500"
+        style={{
+          transformStyle: 'preserve-3d',
+          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+        }}>
+        {/* 正面 */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ backfaceVisibility: 'hidden' }}>
+          {collected ? (
+            <>
+              <Critter id={item.id} size={70}/>
+              <div className="font-bold text-gray-700 text-sm mt-1">{item.name}</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">点击看详情</div>
+            </>
+          ) : (
+            <>
+              <div style={{ filter: 'grayscale(100%) brightness(0.7)', opacity: 0.5 }}>
+                <Critter id={item.id} size={70}/>
+              </div>
+              <div className="absolute top-1 right-1 pointer-events-none">
+                <div className="bg-gray-300 text-gray-500 rounded-full w-7 h-7 flex items-center justify-center font-bold text-base">
+                  ?
+                </div>
+              </div>
+              <div className="absolute bottom-2 text-[10px] text-gray-400">未解锁</div>
+            </>
+          )}
+        </div>
+
+        {/* 背面 */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-2 bg-gradient-to-br from-amber-50 to-orange-100 rounded-xl"
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+          <div className="text-2xl mb-1">{item.id in FACTS ? '💡' : '✨'}</div>
+          <div className="font-bold text-amber-800 text-xs mb-1">{item.name}</div>
+          <div className="text-[10px] text-amber-700 leading-tight text-center px-1">
+            {FACTS[item.id] || '一个可爱的小朋友'}
+          </div>
+          <button onClick={(e) => { e.stopPropagation(); speak(FACTS[item.id] || ''); sound.playCritterSound(item.id); }}
+            className="mt-1 bg-orange-400 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow">
+            🔊 听
+          </button>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+// ============================================
+// 新解锁图鉴提示弹窗（通关后展示）
+// ============================================
+const NewDexUnlock = ({ items, onClose }) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-slide-up">
+      <Confetti active={true}/>
+      <div className="bg-gradient-to-b from-yellow-100 to-orange-100 rounded-3xl p-6 mx-6 max-w-sm shadow-2xl border-4 border-amber-300 animate-pop-in">
+        <div className="text-center">
+          <div className="font-fun text-2xl text-orange-700">🎁 新朋友！</div>
+          <div className="text-sm text-amber-700 mt-1">你认识了 {items.length} 个新朋友</div>
+        </div>
+        <div className="flex justify-center gap-3 mt-4 flex-wrap">
+          {items.map((item, i) => (
+            <div key={item.id} className="bg-white rounded-2xl p-3 shadow-lg animate-pop-in"
+              style={{ animationDelay: `${i * 0.2}s` }}>
+              <Critter id={item.id} size={70}/>
+              <div className="font-bold text-center text-sm mt-1">{item.name}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={onClose}
+          className="mt-5 w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold py-3 rounded-2xl btn-press shadow-lg">
+          收下 ✨
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+// ============================================
+// 伙伴选择页（首次进入）
+// ============================================
+const CompanionPicker = ({ onPick }) => {
+  const [selected, setSelected] = useState(null);
+  const [name, setName] = useState('');
+  const [step, setStep] = useState(1); // 1=选 2=命名
+
+  const handleConfirm = () => {
+    if (!selected) return;
+    sound.play('unlock');
+    const finalName = name.trim() || COMPANIONS.find(c => c.id === selected).name;
+    onPick(selected, finalName);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'linear-gradient(180deg, #FFD9B0 0%, #FFB7D5 50%, #A8D8F5 100%)' }}>
+      <div className="bg-white rounded-3xl p-6 mx-6 max-w-sm shadow-2xl animate-pop-in w-full">
+        {step === 1 ? (
+          <>
+            <div className="text-center mb-4">
+              <div className="font-fun text-2xl text-pink-500">🌟 你的小伙伴</div>
+              <div className="text-sm text-gray-500 mt-1">选一个最喜欢的，它会陪你一起冒险❤️</div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {COMPANIONS.map(c => (
+                <button key={c.id} onClick={() => { sound.playCritterSound(c.id); setSelected(c.id); }}
+                  className={`bg-white rounded-3xl p-3 btn-press shadow border-4 transition
+                    ${selected === c.id ? 'border-pink-400 bg-pink-50 scale-105' : 'border-gray-100'}`}>
+                  <div className="flex justify-center"><Critter id={c.id} size={70}/></div>
+                  <div className="font-bold text-gray-700 mt-1">{c.name}</div>
+                  <div className="text-[10px] text-gray-400 mt-0.5">{c.desc}</div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { if (selected) { sound.play('click'); setStep(2); } }}
+              disabled={!selected}
+              className={`mt-5 w-full py-3 rounded-2xl font-bold transition btn-press
+                ${selected ? 'bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-lg'
+                  : 'bg-gray-200 text-gray-400'}`}>
+              {selected ? '就是它啦！→' : '点点小动物挑一个吧'}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="text-center mb-4">
+              <div className="font-fun text-2xl text-pink-500">🏷️ 起个名字吧</div>
+              <div className="text-sm text-gray-500 mt-1">想叫它什么呢？（也可以跳过）</div>
+            </div>
+            <div className="flex justify-center mb-3">
+              <Critter id={selected} size={100}/>
+            </div>
+            <input type="text" value={name} onChange={e => setName(e.target.value)}
+              placeholder={`默认叫"${COMPANIONS.find(c => c.id === selected).name}"`}
+              maxLength={6}
+              className="w-full p-3 text-center text-lg font-bold border-2 border-pink-200 rounded-2xl outline-none focus:border-pink-400"/>
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <button onClick={() => { sound.play('pop'); setStep(1); }}
+                className="py-3 bg-gray-100 rounded-2xl font-bold text-gray-600 btn-press">
+                ← 重选
+              </button>
+              <button onClick={handleConfirm}
+                className="py-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-2xl btn-press shadow-lg">
+                确认 ✨
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// 成就墙
+// ============================================
+const AchievementsScreen = ({ state, onClose }) => {
+  const tierColors = {
+    1: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-700', label: '铜' },
+    2: { bg: 'from-amber-100 to-amber-200', text: 'text-amber-700', label: '银' },
+    3: { bg: 'from-yellow-200 to-orange-200', text: 'text-orange-800', label: '金' },
+  };
+  const unlockedSet = new Set(state.unlockedAchievements || []);
+  const totalUnlocked = ACHIEVEMENTS.filter(a => unlockedSet.has(a.id)).length;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #FFE8B0 0%, #FFC998 100%)' }}>
+
+      <div className="bg-white/80 shadow p-4 flex items-center gap-3">
+        <button onClick={() => { sound.play('pop'); onClose(); }}
+          className="w-11 h-11 rounded-full bg-white shadow btn-press flex items-center justify-center">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="flex-1">
+          <div className="font-fun text-xl text-amber-700">🏅 成就墙</div>
+          <div className="text-xs text-amber-600 mt-0.5">已解锁 {totalUnlocked}/{ACHIEVEMENTS.length}</div>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 overflow-y-auto scroll-area" style={{ height: 'calc(100% - 80px)' }}>
+        <div className="grid grid-cols-2 gap-3 pb-4">
+          {ACHIEVEMENTS.map(a => {
+            const unlocked = unlockedSet.has(a.id);
+            const c = tierColors[a.tier];
+            return (
+              <div key={a.id}
+                className={`rounded-2xl p-3 shadow border-4 transition relative
+                  ${unlocked ? `bg-gradient-to-br ${c.bg} border-white` : 'bg-gray-100 border-gray-200 opacity-60'}`}>
+                <div className="flex items-start gap-2">
+                  <div className="text-3xl">{unlocked ? a.icon : '🔒'}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-bold text-sm leading-tight ${unlocked ? c.text : 'text-gray-500'}`}>
+                      {unlocked ? a.name : '???'}
+                    </div>
+                    <div className={`text-[10px] mt-0.5 leading-tight ${unlocked ? 'text-gray-700' : 'text-gray-400'}`}>
+                      {a.desc}
+                    </div>
+                    {a.reward && unlocked && (
+                      <div className="text-[10px] text-pink-600 mt-1">🍓+{a.reward}</div>
+                    )}
+                  </div>
+                </div>
+                {unlocked && (
+                  <div className="absolute top-1 right-1 text-[9px] font-bold px-1.5 rounded-full bg-white/80 text-gray-600">
+                    {c.label}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 成就解锁弹窗
+const AchievementUnlock = ({ achievement, onClose }) => {
+  if (!achievement) return null;
+  const tierColors = {
+    1: 'from-blue-300 to-blue-400',
+    2: 'from-amber-300 to-amber-400',
+    3: 'from-yellow-300 to-orange-400',
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <Confetti active={true}/>
+      <div className={`bg-gradient-to-b ${tierColors[achievement.tier]} rounded-3xl p-6 mx-6 max-w-sm shadow-2xl border-4 border-white animate-pop-in`}>
+        <div className="text-center">
+          <div className="text-xs font-bold text-white/80">🏅 解锁成就</div>
+          <div className="text-7xl mt-2 animate-pulse-soft">{achievement.icon}</div>
+          <div className="font-fun text-2xl text-white drop-shadow mt-2">{achievement.name}</div>
+          <div className="text-sm text-white/90 mt-1">{achievement.desc}</div>
+          {achievement.reward && (
+            <div className="mt-3 bg-white/30 inline-block px-3 py-1 rounded-full">
+              <span className="font-bold text-white">🍓 +{achievement.reward}</span>
+            </div>
+          )}
+        </div>
+        <button onClick={onClose}
+          className="mt-5 w-full bg-white text-gray-800 font-bold py-3 rounded-2xl btn-press shadow-lg">
+          太棒了 ✨
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+const WardrobeScreen = ({ state, onClose, onUpdate }) => {
+  const equipped = state.equippedAccessories || [];
+
+  const toggleAccessory = (acc) => {
+    if (!isAccessoryUnlocked(acc, state)) {
+      sound.play('pop');
+      speak(`${acc.desc}才能解锁`);
+      return;
+    }
+    sound.play('click');
+    const isEquipped = equipped.includes(acc.id);
+    let newEquipped;
+    if (isEquipped) {
+      newEquipped = equipped.filter(id => id !== acc.id);
+    } else {
+      // 同 slot 的其他饰品要先卸下
+      const sameSlot = ACCESSORIES.filter(a => a.slot === acc.slot && a.id !== acc.id).map(a => a.id);
+      newEquipped = [...equipped.filter(id => !sameSlot.includes(id)), acc.id];
+    }
+    onUpdate({ equippedAccessories: newEquipped });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #FFF3D6 0%, #FFE8C2 100%)' }}>
+
+      <div className="bg-white/80 shadow p-4 flex items-center gap-3">
+        <button onClick={() => { sound.play('pop'); onClose(); }}
+          className="w-11 h-11 rounded-full bg-white shadow btn-press flex items-center justify-center">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="font-fun text-xl text-amber-700">👗 衣柜</div>
+      </div>
+
+      {/* 预览区 */}
+      <div className="px-4 py-4 bg-gradient-to-b from-amber-100 to-amber-50 flex justify-center">
+        <div className="bg-white rounded-3xl p-4 shadow-lg">
+          <div className="animate-float">
+            <CritterWithAccessories id={state.companion} size={140} equipped={equipped}/>
+          </div>
+        </div>
+      </div>
+
+      {/* 饰品网格 */}
+      <div className="px-4 py-3 overflow-y-auto scroll-area" style={{ height: 'calc(100% - 260px)' }}>
+        <div className="text-xs font-bold text-amber-700 mb-2">可佩戴的饰品 · 点击穿/脱</div>
+        <div className="grid grid-cols-3 gap-3">
+          {ACCESSORIES.map(acc => {
+            const unlocked = isAccessoryUnlocked(acc, state);
+            const isEq = equipped.includes(acc.id);
+            return (
+              <button key={acc.id} onClick={() => toggleAccessory(acc)}
+                className={`bg-white rounded-2xl p-3 btn-press shadow border-4 transition relative
+                  ${isEq ? 'border-amber-400 bg-amber-50' : 'border-white'}
+                  ${!unlocked ? 'opacity-50' : ''}`}>
+                <div className="text-4xl">{unlocked ? acc.emoji : '🔒'}</div>
+                <div className="font-bold text-sm text-gray-700 mt-1">{acc.name}</div>
+                <div className="text-[10px] text-gray-500 mt-0.5 leading-tight">{acc.desc}</div>
+                {isEq && (
+                  <div className="absolute -top-1 -right-1 bg-green-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    ✓
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const CompanionScreen = ({ state, onClose, onUpdate, onOpenWardrobe }) => {
+  const [feeding, setFeeding] = useState(false);
+  const [showFlying, setShowFlying] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+
+  const stage = getGrowthStage(state.companionFed);
+  const moodLevel = getMoodLevel(state.companionMood);
+  const moodLine = getCompanionMoodLine(state.companionMood, stage.stage, state.companionName);
+
+  const progress = stage.next
+    ? ((state.companionFed - (stage.stage === 0 ? 0 : 10)) / (stage.next - (stage.stage === 0 ? 0 : 10))) * 100
+    : 100;
+
+  const handleFeed = () => {
+    if (state.berries < 2) {
+      speak('果子用完啦，去玩游戏可以赚到哦');
+      return;
+    }
+    if (feeding) return;
+    setFeeding(true);
+    setShowFlying(true);
+    sound.play('pop');
+
+    setTimeout(() => {
+      sound.playCritterSound(state.companion);
+      const oldStage = getGrowthStage(state.companionFed).stage;
+      const newStage = getGrowthStage(state.companionFed + 1).stage;
+      const willLevelUp = newStage > oldStage;
+
+      onUpdate({
+        berries: state.berries - 2,
+        companionFed: state.companionFed + 1,
+        companionMood: Math.min(100, state.companionMood + 3),
+      });
+      setShowFlying(false);
+      setFeeding(false);
+
+      if (willLevelUp) {
+        setTimeout(() => {
+          sound.play('unlock');
+          setShowLevelUp(true);
+        }, 300);
+      }
+    }, 600);
+  };
+
+  const handlePat = () => {
+    sound.playCritterSound(state.companion);
+    onUpdate({ companionMood: Math.min(100, state.companionMood + 1) });
+    speak(`${state.companionName}好开心`);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #FFE8F0 0%, #FFD9E8 50%, #FFC0CB 100%)' }}>
+
+      {/* 顶部 */}
+      <div className="bg-white/80 shadow p-4 flex items-center gap-3">
+        <button onClick={() => { sound.play('pop'); onClose(); }}
+          className="w-11 h-11 rounded-full bg-white shadow btn-press flex items-center justify-center">
+          <span className="text-2xl">←</span>
+        </button>
+        <div className="flex-1">
+          <div className="font-fun text-xl text-pink-600">{state.companionName}</div>
+          <div className="text-xs text-pink-500">{stage.icon} {stage.name} · {moodLevel.emoji} {moodLevel.label}</div>
+        </div>
+        <div className="bg-pink-100 rounded-full px-3 py-1.5 flex items-center gap-1">
+          <span className="text-lg">🍓</span>
+          <span className="font-bold text-pink-600 text-sm">{state.berries}</span>
+        </div>
+      </div>
+
+      {/* 主区域：伙伴 */}
+      <div className="absolute inset-0 flex items-center justify-center pt-20 pb-64">
+        {/* 装饰心形 */}
+        <div className="absolute top-1/4 left-12 text-2xl animate-float-slow opacity-60">💗</div>
+        <div className="absolute top-1/3 right-10 text-xl animate-float opacity-50">✨</div>
+        <div className="absolute bottom-1/3 left-1/4 text-xl animate-float-slow opacity-50">⭐</div>
+
+        {/* 伙伴本体 */}
+        <div className="relative">
+          <div className={`${feeding ? 'animate-wiggle' : 'animate-float'} transition-transform`}
+            style={{ transform: `scale(${stage.size + 0.3})` }}>
+            <CritterWithAccessories id={state.companion} size={200} equipped={state.equippedAccessories || []}/>
+          </div>
+
+          {/* 心情对话气泡 */}
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 -translate-y-full bg-white border-2 border-pink-300 rounded-2xl px-3 py-2 shadow-lg whitespace-nowrap animate-pop-in">
+            <div className="text-sm font-bold text-pink-700">{moodLine}</div>
+            <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-full w-0 h-0"
+              style={{
+                borderLeft: '8px solid transparent',
+                borderRight: '8px solid transparent',
+                borderTop: '8px solid #f9a8d4',
+              }}/>
+          </div>
+
+          {/* 飞行的果子 */}
+          {showFlying && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 text-4xl pointer-events-none"
+              style={{ animation: 'feed-fly 0.6s ease-in forwards' }}>
+              🍓
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 底部状态卡片 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl p-5">
+        {/* 成长进度 */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+            <span className="font-bold">🌱 成长进度</span>
+            <span>{stage.next ? `${state.companionFed}/${stage.next}` : '满级 ⭐'}</span>
+          </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-green-300 to-green-500 transition-all"
+              style={{ width: `${progress}%` }}/>
+          </div>
+        </div>
+
+        {/* 心情进度 */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+            <span className="font-bold">{moodLevel.emoji} 心情值</span>
+            <span>{state.companionMood}/100</span>
+          </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full transition-all"
+              style={{ width: `${state.companionMood}%`, background: moodLevel.color }}/>
+          </div>
+        </div>
+
+        {/* 操作按钮 */}
+        <div className="grid grid-cols-3 gap-2">
+          <button onClick={handleFeed} disabled={feeding || state.berries < 2}
+            className={`py-3 rounded-2xl font-bold btn-press shadow flex flex-col items-center justify-center gap-0.5
+              ${state.berries < 2 ? 'bg-gray-200 text-gray-400' : 'bg-gradient-to-r from-pink-400 to-pink-500 text-white'}`}>
+            <span className="text-xl">🍓</span>
+            <span className="text-xs">喂食(2)</span>
+          </button>
+          <button onClick={handlePat}
+            className="py-3 bg-gradient-to-r from-yellow-300 to-yellow-400 text-yellow-900 font-bold rounded-2xl btn-press shadow flex flex-col items-center justify-center gap-0.5">
+            <span className="text-xl">💝</span>
+            <span className="text-xs">摸摸</span>
+          </button>
+          <button onClick={() => { sound.play('click'); onOpenWardrobe(); }}
+            className="py-3 bg-gradient-to-r from-purple-300 to-purple-400 text-purple-900 font-bold rounded-2xl btn-press shadow flex flex-col items-center justify-center gap-0.5">
+            <span className="text-xl">👗</span>
+            <span className="text-xs">衣柜</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 升级特效 */}
+      {showLevelUp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <Confetti active={true}/>
+          <div className="bg-white rounded-3xl p-6 mx-6 text-center animate-pop-in shadow-2xl">
+            <div className="text-6xl mb-2">🎉</div>
+            <div className="font-fun text-2xl text-pink-600">{state.companionName} 长大啦！</div>
+            <div className="text-sm text-gray-600 mt-1">现在是 {stage.name} {stage.icon}</div>
+            <div className="my-4 flex justify-center">
+              <CritterWithAccessories id={state.companion} size={120} equipped={state.equippedAccessories || []}/>
+            </div>
+            <button onClick={() => setShowLevelUp(false)}
+              className="w-full py-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-2xl btn-press">
+              太棒了 ✨
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+const DailyBox = ({ onClaim }) => {
+  const [opened, setOpened] = useState(false);
+  const [reward] = useState(() => {
+    // 20% 8果 / 55% 12果 / 25% 25果（更慷慨）
+    const r = Math.random();
+    return r < 0.2 ? 8 : r < 0.75 ? 12 : 25;
+  });
+
+  const handleOpen = () => {
+    if (opened) return;
+    sound.play('unlock');
+    setOpened(true);
+    setTimeout(() => onClaim(reward), 1500);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center animate-slide-up">
+      <Confetti active={opened}/>
+      <div className="bg-gradient-to-b from-pink-100 to-yellow-100 rounded-3xl p-6 mx-6 max-w-sm shadow-2xl border-4 border-yellow-300 animate-pop-in">
+        <div className="text-center">
+          <div className="font-fun text-2xl text-pink-600">🎁 今日礼物</div>
+          <div className="text-sm text-pink-500 mt-1">欢迎你今天来玩～</div>
+
+          {!opened ? (
+            <button onClick={handleOpen} className="mt-5 inline-block btn-press">
+              <div className="text-9xl animate-pulse-soft">🎁</div>
+              <div className="mt-2 bg-pink-400 text-white font-bold px-6 py-2 rounded-full shadow-lg">
+                打开礼物 ✨
+              </div>
+            </button>
+          ) : (
+            <div className="mt-5 animate-pop-in">
+              <div className="text-8xl">🍓</div>
+              <div className="font-fun text-3xl text-pink-600 mt-2">+{reward}</div>
+              <div className="text-sm text-pink-500 mt-1">送给你的果子，明天再来哦～</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ParentMode = ({ state, onClose, onReset }) => {
+  const [verified, setVerified] = useState(false);
+  const [question] = useState(() => ({
+    a: Math.floor(Math.random() * 10) + 5,
+    b: Math.floor(Math.random() * 10) + 3,
+  }));
+  const a = question.a, b = question.b;
+  const [input, setInput] = useState('');
+
+  const totalStars = Object.values(state.progress).reduce((sum, p) =>
+    sum + Object.values(p.stars).reduce((s, x) => s+x, 0), 0);
+  const totalCompleted = Object.values(state.progress).reduce((sum, p) =>
+    sum + Object.values(p.stars).filter(s => s > 0).length, 0);
+
+  if (!verified) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+        <div className="bg-white rounded-3xl p-6 mx-6 max-w-sm animate-pop-in">
+          <div className="text-center">
+            <div className="text-4xl mb-2">👨‍👩‍👧</div>
+            <div className="font-bold text-lg text-gray-800">家长专属入口</div>
+            <div className="text-xs text-gray-400 mt-1">为了保护宝贝，请家长回答</div>
+            <div className="text-base text-gray-700 mt-3 font-bold">{a} + {b} = ?</div>
+            <input type="number" value={input} onChange={e => setInput(e.target.value)}
+              className="mt-3 w-32 text-center text-2xl font-bold border-b-2 border-gray-300 outline-none focus:border-pink-400 py-1"
+              autoFocus/>
+            <div className="flex gap-2 mt-4">
+              <button onClick={onClose}
+                className="flex-1 py-2 bg-gray-200 rounded-2xl text-gray-600 btn-press">取消</button>
+              <button onClick={() => { if (parseInt(input) === a+b) setVerified(true); else setInput(''); }}
+                className="flex-1 py-2 bg-pink-400 text-white font-bold rounded-2xl btn-press">进入</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-gray-100">
+      <div className="bg-white shadow p-4 flex items-center gap-3">
+        <button onClick={onClose} className="w-10 h-10 rounded-full bg-gray-100 btn-press flex items-center justify-center">
+          <span>←</span>
+        </button>
+        <div>
+          <div className="font-bold text-lg">家长中心</div>
+          <div className="text-xs text-gray-500">查看宝贝的学习进度</div>
+        </div>
+      </div>
+      <div className="p-4 space-y-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-sm font-bold text-gray-700 mb-1">📊 宝贝的学习成果</div>
+          <div className="grid grid-cols-3 gap-3 mt-3">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-pink-500">{totalCompleted}</div>
+              <div className="text-xs text-gray-600 mt-1">通关数</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-amber-500">{totalStars}</div>
+              <div className="text-xs text-gray-600 mt-1">星星数</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-500">{state.collected.length}</div>
+              <div className="text-xs text-gray-600 mt-1">图鉴数</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-pink-50 to-amber-50 rounded-2xl p-4 shadow-sm border border-pink-100">
+          <div className="text-sm font-bold text-pink-700 mb-2">💝 给爸爸妈妈的话</div>
+          <div className="text-xs text-gray-700 leading-relaxed">
+            小铭奇遇记没有任何广告和诱导付费，让宝贝放心玩。每个关卡都基于 4-6 岁认知发展设计，希望成为宝贝认识世界的小伙伴。
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-sm font-bold text-gray-700 mb-2">📮 联系我们</div>
+          <div className="space-y-2">
+            <button onClick={() => { 
+              const subject = encodeURIComponent('小铭奇遇记 · 反馈');
+              window.location.href = `mailto:feedback@xiaoming.app?subject=${subject}`;
+            }} className="w-full text-left bg-blue-50 rounded-xl p-3 btn-press flex items-center gap-3">
+              <span className="text-xl">✉️</span>
+              <div>
+                <div className="text-sm font-bold text-blue-700">邮件反馈</div>
+                <div className="text-[10px] text-blue-500">feedback@xiaoming.app</div>
+              </div>
+            </button>
+            <button onClick={() => { 
+              alert('家长群二维码即将推出，敬请期待～');
+            }} className="w-full text-left bg-green-50 rounded-xl p-3 btn-press flex items-center gap-3">
+              <span className="text-xl">👨‍👩‍👧</span>
+              <div>
+                <div className="text-sm font-bold text-green-700">加入家长群</div>
+                <div className="text-[10px] text-green-500">和其他家长交流育儿经验</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-sm font-bold text-gray-700 mb-2">🚧 即将上线</div>
+          <div className="text-xs text-gray-600 leading-relaxed">
+            学习时长统计、时间限制、自定义图鉴等功能正在开发中～
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-sm font-bold text-gray-700 mb-2">📋 关于</div>
+          <div className="text-xs text-gray-600 space-y-1">
+            <div>版本：1.0.0</div>
+            <div>本应用<span className="text-green-600 font-bold">不收集任何个人信息</span></div>
+            <div>所有数据仅保存在您的设备本地</div>
+            <div>无广告 · 无内购 · 离线可玩</div>
+          </div>
+        </div>
+
+        <button onClick={() => { if (confirm('清空进度后，所有图鉴和星星都会消失，确定吗？')) { onReset(); onClose(); } }}
+          className="w-full p-3 bg-red-50 text-red-500 rounded-2xl text-sm">
+          🗑️ 清空所有进度
+        </button>
+
+        <div className="text-center text-[10px] text-gray-400 pt-2 pb-4">
+          © 2025 小铭奇遇记 · 用心为孩子做的每一关
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// 主 App
+// ============================================
+// ============================================
+// 启动屏（splash screen）
+// ============================================
+const SplashScreen = ({ onDone, isFirstTime }) => {
+  useEffect(() => {
+    const duration = isFirstTime ? 2800 : 1500;
+    const timer = setTimeout(onDone, duration);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[100] overflow-hidden flex items-center justify-center"
+      style={{
+        background: 'linear-gradient(180deg, #FFD9B0 0%, #FFB7D5 35%, #A8D8F5 70%, #5FA8DC 100%)'
+      }}>
+      {/* 太阳 */}
+      <div className="absolute top-12 right-12 animate-float-slow">
+        <div className="relative w-24 h-24">
+          <div className="absolute inset-0 bg-yellow-300 rounded-full"
+            style={{ boxShadow: '0 0 60px rgba(255, 220, 100, 0.9)' }}/>
+          <div className="absolute" style={{ left: 26, top: 36, width: 10, height: 10, background: '#333', borderRadius: '50%' }}/>
+          <div className="absolute" style={{ right: 26, top: 36, width: 10, height: 10, background: '#333', borderRadius: '50%' }}/>
+          <div className="absolute" style={{ left: 36, top: 56, width: 24, height: 12, borderBottom: '4px solid #333', borderRadius: '0 0 100% 100%' }}/>
+        </div>
+      </div>
+
+      {/* 云朵 */}
+      <div className="absolute top-20 left-16 animate-float-slow" style={{ animationDelay: '1s' }}>
+        <div className="relative">
+          <div className="absolute w-20 h-12 bg-white rounded-full opacity-90" style={{ left: 0, top: 6 }}/>
+          <div className="absolute w-16 h-14 bg-white rounded-full opacity-90" style={{ left: 22, top: 0 }}/>
+          <div className="absolute w-14 h-10 bg-white rounded-full opacity-90" style={{ left: 42, top: 10 }}/>
+        </div>
+      </div>
+      <div className="absolute top-36 right-32 animate-float" style={{ animationDelay: '0.5s' }}>
+        <div className="relative">
+          <div className="absolute w-14 h-9 bg-white rounded-full opacity-80" style={{ left: 0, top: 5 }}/>
+          <div className="absolute w-12 h-10 bg-white rounded-full opacity-80" style={{ left: 16, top: 0 }}/>
+        </div>
+      </div>
+
+      {/* 蝴蝶 */}
+      <div className="absolute top-1/3 left-12 text-3xl animate-float">🦋</div>
+      <div className="absolute top-1/2 right-16 text-2xl animate-float-slow" style={{ animationDelay: '1.2s' }}>✨</div>
+
+      {/* 中央：Logo + 文字 */}
+      <div className="relative z-10 text-center px-6">
+        {/* 彩虹拱 */}
+        <div className="text-6xl mb-2 animate-pop-in">🌈</div>
+
+        {/* 标题（动画进入） */}
+        <div className="bg-white/95 rounded-3xl px-8 py-5 shadow-2xl animate-pop-in" style={{ animationDelay: '0.3s' }}>
+          <div className="font-fun text-4xl text-pink-500">小铭奇遇记</div>
+          <div className="text-xs text-gray-400 mt-2 tracking-widest">XIAOMING ADVENTURE</div>
+        </div>
+
+        {/* 加载点 */}
+        <div className="flex justify-center gap-2 mt-6">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="w-3 h-3 rounded-full bg-white/80 animate-pulse-soft"
+              style={{ animationDelay: `${i * 0.2}s` }}/>
+          ))}
+        </div>
+
+        {/* 副标题 */}
+        <div className="mt-4 text-white/90 font-bold text-sm drop-shadow"
+          style={{ animation: 'pop-in 0.6s 0.8s backwards' }}>
+          {isFirstTime ? '准备开始一段奇妙的冒险～' : '欢迎回来！'}
+        </div>
+      </div>
+
+      {/* 底部装饰小动物 */}
+      <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-4 animate-pop-in"
+        style={{ animationDelay: '1.2s' }}>
+        <div style={{ animation: 'float 3s ease-in-out infinite', animationDelay: '0s' }}>
+          <Critter id="rabbit" size={50}/>
+        </div>
+        <div style={{ animation: 'float 3s ease-in-out infinite', animationDelay: '0.4s' }}>
+          <Critter id="bear" size={50}/>
+        </div>
+        <div style={{ animation: 'float 3s ease-in-out infinite', animationDelay: '0.8s' }}>
+          <Critter id="cat" size={50}/>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const [state, setState] = useState(loadState);
+  const [showSplash, setShowSplash] = useState(true);
+  const [screen, setScreen] = useState('home'); // home | island | level
+  const [currentIsland, setCurrentIsland] = useState(null);
+  const [currentLevel, setCurrentLevel] = useState(null);
+  const [showWin, setShowWin] = useState(null);
+  const [showParent, setShowParent] = useState(false);
+  const [showDex, setShowDex] = useState(false);
+  const [showDaily, setShowDaily] = useState(false);
+  const [showCompanion, setShowCompanion] = useState(false);
+  const [showWardrobe, setShowWardrobe] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [pendingAchievement, setPendingAchievement] = useState(null);
+
+  // 监听 state 变化，检测新解锁的成就
+  useEffect(() => {
+    setState(prev => {
+      const earned = computeAchievements(prev).map(a => a.id);
+      const known = prev.unlockedAchievements || [];
+      const newly = earned.filter(id => !known.includes(id));
+      if (newly.length === 0) return prev;
+
+      const newAch = ACHIEVEMENTS.find(a => a.id === newly[0]);
+      const totalReward = newly.reduce((sum, id) => {
+        const a = ACHIEVEMENTS.find(x => x.id === id);
+        return sum + (a.reward || 0);
+      }, 0);
+      // 弹窗交给下次 render 触发
+      setTimeout(() => setPendingAchievement(newAch), 600);
+      return {
+        ...prev,
+        unlockedAchievements: [...known, ...newly],
+        berries: prev.berries + totalReward,
+      };
+    });
+  }, [state.collected, state.companionFed, state.berries, state.companion,
+      state.equippedAccessories, state.progress]);
+
+  // 启动时：心情衰减
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    setState(prev => {
+      const updates = {};
+      // 心情衰减：每天没来 -10，最多累计 -20
+      if (prev.companion && prev.lastVisitDate && prev.lastVisitDate !== today) {
+        const daysSince = Math.floor(
+          (new Date(today) - new Date(prev.lastVisitDate)) / (1000 * 60 * 60 * 24)
+        );
+        if (daysSince > 0) {
+          const drop = Math.min(20, daysSince * 10);
+          updates.companionMood = Math.max(0, prev.companionMood - drop);
+        }
+      }
+      updates.lastVisitDate = today;
+      return { ...prev, ...updates };
+    });
+  }, []);
+
+  // 每日宝箱：选好伙伴后才弹（避免选伙伴和宝箱叠加）
+  useEffect(() => {
+    if (!state.companion) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (state.lastDailyDate === today) return;
+    const t = setTimeout(() => setShowDaily(true), 1200);
+    return () => clearTimeout(t);
+  }, [state.companion]);
+
+  const handleDailyClaim = (reward) => {
+    const today = new Date().toISOString().slice(0, 10);
+    setState(prev => ({ ...prev, berries: prev.berries + reward, lastDailyDate: today }));
+    setShowDaily(false);
+  };
+
+  const handlePickCompanion = (id, name) => {
+    setState(prev => ({ ...prev, companion: id, companionName: name }));
+  };
+
+  const handleCompanionUpdate = (updates) => {
+    setState(prev => ({ ...prev, ...updates }));
+  };
+
+  useEffect(() => { saveState(state); }, [state]);
+
+  const handleIslandClick = (island) => {
+    if (!island.unlocked) {
+      sound.play('pop');
+      return;
+    }
+    setCurrentIsland(island);
+    setScreen('island');
+  };
+
+  const handleLevelClick = (level) => {
+    setCurrentLevel(level);
+    setScreen('level');
+  };
+
+  const handleLevelComplete = (islandId, levelId, stars) => {
+    // 提前算出"这次新解锁的"
+    const island = ISLANDS.find(i => i.id === islandId);
+    const level = island.levels.find(l => l.id === levelId);
+    const newlyUnlocked = level.pool
+      .filter(itemId => !state.collected.includes(itemId))
+      .map(itemId => island.items.find(i => i.id === itemId))
+      .filter(Boolean);
+
+    // 计算奖励
+    const oldStars = state.progress[islandId]?.stars[levelId] || 0;
+    const isNew = oldStars === 0;
+    const earnedBerries = isNew ? 5 + stars : Math.max(0, stars - oldStars) * 2;
+
+    setState(prev => {
+      const newCollected = [...prev.collected];
+      level.pool.forEach(itemId => {
+        if (!newCollected.includes(itemId)) newCollected.push(itemId);
+      });
+
+      return {
+        ...prev,
+        progress: {
+          ...prev.progress,
+          [islandId]: {
+            ...prev.progress[islandId],
+            stars: { ...prev.progress[islandId].stars, [levelId]: Math.max(oldStars, stars) },
+          },
+        },
+        berries: prev.berries + earnedBerries,
+        collected: newCollected,
+        companionMood: Math.min(100, prev.companionMood + 5),
+      };
+    });
+    setShowWin({ stars, berries: earnedBerries, newlyUnlocked });
+  };
+
+  const handleReset = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setState(loadState());
+    setScreen('home');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
+      <div className="w-full h-full max-w-md max-h-[900px] relative bg-white shadow-2xl md:rounded-3xl overflow-hidden">
+        {showSplash && (
+          <SplashScreen
+            isFirstTime={!state.companion}
+            onDone={() => setShowSplash(false)}/>
+        )}
+        {!state.companion && !showSplash && (
+          <CompanionPicker onPick={handlePickCompanion}/>
+        )}
+        {screen === 'home' && state.companion && (
+          <HomeScreen state={state}
+            onIslandClick={handleIslandClick}
+            onParentMode={() => setShowParent(true)}
+            onOpenDex={() => setShowDex(true)}
+            onOpenCompanion={() => setShowCompanion(true)}
+            onOpenAchievements={() => setShowAchievements(true)}/>
+        )}
+        {screen === 'island' && currentIsland && (
+          <IslandScreen
+            island={currentIsland}
+            state={state}
+            onBack={() => setScreen('home')}
+            onLevelClick={handleLevelClick}
+          />
+        )}
+        {screen === 'level' && currentIsland && currentLevel && (
+          <LevelScreen
+            island={currentIsland}
+            level={currentLevel}
+            onBack={() => setScreen('island')}
+            onComplete={handleLevelComplete}
+          />
+        )}
+        {showWin && (
+          <WinModal stars={showWin.stars} berries={showWin.berries}
+            newlyUnlocked={showWin.newlyUnlocked}
+            onClose={() => { setShowWin(null); setScreen('island'); }}/>
+        )}
+        {showParent && (
+          <ParentMode state={state} onClose={() => setShowParent(false)} onReset={handleReset}/>
+        )}
+        {showDex && (
+          <DexScreen state={state} onClose={() => setShowDex(false)}/>
+        )}
+        {showDaily && (
+          <DailyBox onClaim={handleDailyClaim}/>
+        )}
+        {showCompanion && state.companion && (
+          <CompanionScreen state={state}
+            onClose={() => setShowCompanion(false)}
+            onUpdate={handleCompanionUpdate}
+            onOpenWardrobe={() => setShowWardrobe(true)}/>
+        )}
+        {showWardrobe && state.companion && (
+          <WardrobeScreen state={state}
+            onClose={() => setShowWardrobe(false)}
+            onUpdate={handleCompanionUpdate}/>
+        )}
+        {showAchievements && (
+          <AchievementsScreen state={state} onClose={() => setShowAchievements(false)}/>
+        )}
+        {pendingAchievement && (
+          <AchievementUnlock achievement={pendingAchievement}
+            onClose={() => { sound.play('click'); setPendingAchievement(null); }}/>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+
+<script>
+// 注册 Service Worker（实现离线）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('✅ 离线模式已启用'))
+      .catch(err => console.warn('Service Worker 注册失败:', err));
+  });
+}
+</script>
+</body>
+</html>
