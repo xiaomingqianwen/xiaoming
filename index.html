@@ -475,88 +475,220 @@ const CRITTER_SVG = {
     <ellipse cx="68" cy="60" rx="3" ry="2" fill="#FFB7B7" opacity="0.6"/>
   </g>,
 
-  // 🍎 苹果
+  // 🍎 苹果 —— 红苹果，立体高光、绿叶
   apple: <g>
-    <path d="M50 30 Q50 22 55 22 Q60 22 60 28 Q60 25 56 26" fill="none" stroke="#5C3D1F" strokeWidth="2" strokeLinecap="round"/>
-    <ellipse cx="58" cy="22" rx="6" ry="3" fill="#5DAA3A" transform="rotate(20 58 22)"/>
-    <circle cx="50" cy="58" r="30" fill="#E63946"/>
-    <ellipse cx="40" cy="48" rx="8" ry="14" fill="#FF6B6B" opacity="0.6"/>
-    <circle cx="42" cy="50" r="3" fill="#FFB7B7" opacity="0.8"/>
-    <circle cx="42" cy="56" r="3" fill="#2C1810"/><circle cx="43" cy="54.5" r="1" fill="#fff"/>
-    <circle cx="58" cy="56" r="3" fill="#2C1810"/><circle cx="59" cy="54.5" r="1" fill="#fff"/>
-    <path d="M44 64 Q50 68 56 64" stroke="#2C1810" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 阴影底 */}
+    <ellipse cx="52" cy="88" rx="28" ry="3" fill="#000" opacity="0.15"/>
+    {/* 苹果主体（带凹陷顶） */}
+    <path d="M50 32 Q22 30 22 60 Q22 86 50 88 Q78 86 78 60 Q78 30 50 32 Z" fill="#E63946"/>
+    {/* 立体高光 */}
+    <ellipse cx="38" cy="48" rx="9" ry="14" fill="#FFFFFF" opacity="0.4"/>
+    <ellipse cx="36" cy="44" rx="4" ry="6" fill="#FFFFFF" opacity="0.6"/>
+    {/* 顶部凹陷阴影 */}
+    <ellipse cx="50" cy="34" rx="8" ry="3" fill="#A8232E" opacity="0.5"/>
+    {/* 茎 */}
+    <path d="M50 32 Q49 24 50 18" stroke="#5C3D1F" strokeWidth="3" fill="none" strokeLinecap="round"/>
+    {/* 叶子 */}
+    <path d="M52 22 Q66 18 68 26 Q60 32 52 26 Z" fill="#5DAA3A"/>
+    <path d="M55 24 Q62 22 64 27" stroke="#3D8825" strokeWidth="0.8" fill="none"/>
+    {/* 表情 - 眼睛 */}
+    <circle cx="42" cy="58" r="3.5" fill="#1A0F08"/>
+    <circle cx="58" cy="58" r="3.5" fill="#1A0F08"/>
+    <circle cx="43" cy="56.5" r="1.2" fill="#fff"/>
+    <circle cx="59" cy="56.5" r="1.2" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M44 67 Q50 72 56 67" stroke="#1A0F08" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <path d="M44 67 Q50 71 56 67 L56 68 Q50 73 44 68 Z" fill="#FF8FA3" opacity="0.5"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="32" cy="62" rx="3.5" ry="2.5" fill="#FFB7B7" opacity="0.6"/>
+    <ellipse cx="68" cy="62" rx="3.5" ry="2.5" fill="#FFB7B7" opacity="0.6"/>
   </g>,
 
-  // 🍌 香蕉
+  // 🍌 香蕉 —— 弯弯黄香蕉，带蒂
   banana: <g>
-    <path d="M25 40 Q20 60 30 80 Q50 90 75 75 Q85 65 80 55 Q70 70 50 75 Q35 75 32 60 Q30 50 30 40 Z" fill="#FFD93D"/>
-    <path d="M25 40 Q22 50 28 65" stroke="#E8B82C" strokeWidth="2" fill="none"/>
-    <ellipse cx="22" cy="38" rx="4" ry="3" fill="#5C3D1F"/>
-    <ellipse cx="78" cy="73" rx="4" ry="3" fill="#5C3D1F"/>
-    <circle cx="48" cy="65" r="2.5" fill="#2C1810"/><circle cx="49" cy="64" r="0.8" fill="#fff"/>
-    <circle cx="58" cy="65" r="2.5" fill="#2C1810"/><circle cx="59" cy="64" r="0.8" fill="#fff"/>
-    <path d="M50 70 Q53 73 56 71" stroke="#2C1810" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    {/* 阴影 */}
+    <ellipse cx="52" cy="88" rx="32" ry="3" fill="#000" opacity="0.12"/>
+    {/* 香蕉主体（弯月形）*/}
+    <path d="M22 36 Q15 50 18 70 Q22 84 40 86 Q65 88 80 78 Q90 68 86 56 Q82 64 70 70 Q55 76 42 72 Q30 65 28 50 Q28 42 30 36 Z" fill="#FFD93D"/>
+    {/* 高光面 */}
+    <path d="M28 40 Q22 50 25 65 Q28 70 34 72 Q33 60 32 50 Q32 44 33 38 Z" fill="#FFE979" opacity="0.7"/>
+    {/* 阴影面 */}
+    <path d="M84 60 Q88 68 80 76 Q70 82 55 82 Q70 80 78 72 Q83 66 84 60 Z" fill="#D4A91F"/>
+    {/* 棱线 */}
+    <path d="M22 36 Q20 50 22 65" stroke="#D4A91F" strokeWidth="1" fill="none" opacity="0.6"/>
+    <path d="M86 56 Q90 65 84 76" stroke="#D4A91F" strokeWidth="1" fill="none" opacity="0.6"/>
+    {/* 顶部蒂 */}
+    <ellipse cx="22" cy="36" rx="5" ry="3" fill="#5C3D1F"/>
+    <rect x="20" y="30" width="4" height="8" rx="1" fill="#7A5230"/>
+    {/* 底部黑点 */}
+    <ellipse cx="80" cy="76" rx="3" ry="2" fill="#5C3D1F"/>
+    {/* 表情 - 眼睛 */}
+    <circle cx="44" cy="58" r="3" fill="#1A0F08"/>
+    <circle cx="56" cy="58" r="3" fill="#1A0F08"/>
+    <circle cx="45" cy="56.5" r="1" fill="#fff"/>
+    <circle cx="57" cy="56.5" r="1" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M46 65 Q50 68 54 65" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 红脸蛋 */}
+    <ellipse cx="38" cy="62" rx="2.5" ry="2" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="62" cy="62" rx="2.5" ry="2" fill="#FF8FA3" opacity="0.5"/>
   </g>,
 
-  // 🍉 西瓜
+  // 🍉 西瓜 —— 半切的西瓜片
   watermelon: <g>
-    <path d="M15 55 Q15 30 50 25 Q85 30 85 55 Z" fill="#2D5F3F"/>
-    <path d="M22 55 Q22 35 50 31 Q78 35 78 55 Z" fill="#A8D88A"/>
-    <path d="M28 55 Q28 40 50 37 Q72 40 72 55 Z" fill="#FF6B6B"/>
-    <ellipse cx="38" cy="48" rx="2" ry="3" fill="#2C1810"/>
-    <ellipse cx="50" cy="45" rx="2" ry="3" fill="#2C1810"/>
-    <ellipse cx="62" cy="48" rx="2" ry="3" fill="#2C1810"/>
-    <ellipse cx="44" cy="52" rx="2" ry="3" fill="#2C1810"/>
-    <ellipse cx="56" cy="52" rx="2" ry="3" fill="#2C1810"/>
-    <circle cx="42" cy="42" r="2" fill="#2C1810"/><circle cx="42.5" cy="41" r="0.6" fill="#fff"/>
-    <circle cx="58" cy="42" r="2" fill="#2C1810"/><circle cx="58.5" cy="41" r="0.6" fill="#fff"/>
-    <path d="M46 48 Q50 50 54 48" stroke="#2C1810" strokeWidth="1" fill="none" strokeLinecap="round"/>
+    {/* 阴影 */}
+    <ellipse cx="52" cy="88" rx="32" ry="3" fill="#000" opacity="0.15"/>
+    {/* 外皮（深绿）*/}
+    <path d="M14 70 Q14 30 50 26 Q86 30 86 70 Q50 76 14 70 Z" fill="#2D5F3F"/>
+    {/* 浅绿条纹 */}
+    <path d="M28 30 Q32 50 30 68" stroke="#5DAA3A" strokeWidth="3" fill="none" opacity="0.7"/>
+    <path d="M50 26 Q50 50 50 70" stroke="#5DAA3A" strokeWidth="3" fill="none" opacity="0.7"/>
+    <path d="M72 30 Q68 50 70 68" stroke="#5DAA3A" strokeWidth="3" fill="none" opacity="0.7"/>
+    {/* 白色内皮 */}
+    <path d="M20 68 Q20 35 50 32 Q80 35 80 68 Q50 73 20 68 Z" fill="#F5F5F5"/>
+    {/* 红色果肉 */}
+    <path d="M24 65 Q24 38 50 36 Q76 38 76 65 Q50 70 24 65 Z" fill="#FF4757"/>
+    {/* 黑色西瓜籽 */}
+    <ellipse cx="34" cy="48" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(-15 34 48)"/>
+    <ellipse cx="44" cy="44" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(-5 44 44)"/>
+    <ellipse cx="56" cy="44" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(10 56 44)"/>
+    <ellipse cx="66" cy="48" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(20 66 48)"/>
+    <ellipse cx="38" cy="58" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(-10 38 58)"/>
+    <ellipse cx="62" cy="58" rx="2" ry="3.5" fill="#1A0F08" transform="rotate(15 62 58)"/>
+    {/* 表情 - 眼睛（在果肉上） */}
+    <ellipse cx="44" cy="52" rx="2.5" ry="3" fill="#1A0F08"/>
+    <ellipse cx="56" cy="52" rx="2.5" ry="3" fill="#1A0F08"/>
+    <circle cx="44.5" cy="51" r="0.9" fill="#fff"/>
+    <circle cx="56.5" cy="51" r="0.9" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M46 60 Q50 63 54 60" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
   </g>,
 
-  // 🍇 葡萄
+  // 🍇 葡萄 —— 紫色串
   grape: <g>
-    <path d="M50 22 Q55 22 56 28" fill="none" stroke="#5C3D1F" strokeWidth="2" strokeLinecap="round"/>
-    <ellipse cx="58" cy="24" rx="5" ry="3" fill="#5DAA3A"/>
-    {[
-      [40,40],[50,40],[60,40],
-      [35,50],[45,50],[55,50],[65,50],
-      [40,60],[50,60],[60,60],
-      [45,70],[55,70],
-      [50,78]
-    ].map(([x,y],i) => (
-      <circle key={i} cx={x} cy={y} r="7" fill="#7C4DBE"/>
-    ))}
-    {[[40,40],[50,40],[60,40],[35,50],[45,50],[55,50],[65,50],[40,60],[50,60],[60,60],[45,70],[55,70],[50,78]].map(([x,y],i) => (
-      <circle key={`h${i}`} cx={x-1.5} cy={y-1.5} r="2" fill="#B59CE6" opacity="0.7"/>
-    ))}
-    <circle cx="46" cy="50" r="2" fill="#2C1810"/><circle cx="46.5" cy="49.3" r="0.6" fill="#fff"/>
-    <circle cx="54" cy="50" r="2" fill="#2C1810"/><circle cx="54.5" cy="49.3" r="0.6" fill="#fff"/>
-    <path d="M48 54 Q50 56 52 54" stroke="#2C1810" strokeWidth="1" fill="none" strokeLinecap="round"/>
+    {/* 阴影 */}
+    <ellipse cx="52" cy="88" rx="20" ry="3" fill="#000" opacity="0.12"/>
+    {/* 顶部茎 */}
+    <path d="M50 18 Q50 25 50 30" stroke="#5C3D1F" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    {/* 叶子 */}
+    <path d="M50 22 Q62 18 66 26 Q58 32 50 26 Z" fill="#5DAA3A"/>
+    <path d="M55 24 Q62 22 64 27" stroke="#3D8825" strokeWidth="0.8" fill="none"/>
+    <path d="M48 22 Q40 22 38 28 Q44 30 50 26 Z" fill="#7DD05A"/>
+    {/* 葡萄串底层（深紫，有立体感）*/}
+    <g>
+      <circle cx="35" cy="42" r="9" fill="#5C3D8A"/>
+      <circle cx="50" cy="40" r="9" fill="#5C3D8A"/>
+      <circle cx="65" cy="42" r="9" fill="#5C3D8A"/>
+      <circle cx="42" cy="55" r="9" fill="#5C3D8A"/>
+      <circle cx="58" cy="55" r="9" fill="#5C3D8A"/>
+      <circle cx="35" cy="68" r="9" fill="#5C3D8A"/>
+      <circle cx="50" cy="68" r="9" fill="#5C3D8A"/>
+      <circle cx="65" cy="68" r="9" fill="#5C3D8A"/>
+      <circle cx="42" cy="80" r="8" fill="#5C3D8A"/>
+      <circle cx="58" cy="80" r="8" fill="#5C3D8A"/>
+      <circle cx="50" cy="88" r="7" fill="#5C3D8A"/>
+    </g>
+    {/* 葡萄串顶层（亮紫）*/}
+    <g>
+      <circle cx="35" cy="42" r="7.5" fill="#7C4DBE"/>
+      <circle cx="50" cy="40" r="7.5" fill="#9460D6"/>
+      <circle cx="65" cy="42" r="7.5" fill="#7C4DBE"/>
+      <circle cx="42" cy="55" r="7.5" fill="#9460D6"/>
+      <circle cx="58" cy="55" r="7.5" fill="#9460D6"/>
+      <circle cx="35" cy="68" r="7.5" fill="#7C4DBE"/>
+      <circle cx="50" cy="68" r="7.5" fill="#9460D6"/>
+      <circle cx="65" cy="68" r="7.5" fill="#7C4DBE"/>
+      <circle cx="42" cy="80" r="6.5" fill="#7C4DBE"/>
+      <circle cx="58" cy="80" r="6.5" fill="#7C4DBE"/>
+      <circle cx="50" cy="88" r="5.5" fill="#7C4DBE"/>
+    </g>
+    {/* 高光（每颗都有小高光，立体感关键）*/}
+    <circle cx="33" cy="40" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="48" cy="38" r="2.5" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="63" cy="40" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="40" cy="53" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="56" cy="53" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="33" cy="66" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="48" cy="66" r="2" fill="#C8A8E6" opacity="0.9"/>
+    <circle cx="63" cy="66" r="2" fill="#C8A8E6" opacity="0.9"/>
+    {/* 表情 - 眼睛（在中央那颗上） */}
+    <circle cx="46" cy="55" r="1.5" fill="#1A0F08"/>
+    <circle cx="54" cy="55" r="1.5" fill="#1A0F08"/>
+    <circle cx="46.5" cy="54.5" r="0.5" fill="#fff"/>
+    <circle cx="54.5" cy="54.5" r="0.5" fill="#fff"/>
+    <path d="M48 58 Q50 60 52 58" stroke="#1A0F08" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
   </g>,
 
-  // 🍓 草莓
+  // 🍓 草莓 —— 红草莓带绿叶
   strawberry: <g>
-    <path d="M40 28 Q45 24 50 28 Q55 24 60 28 L58 36 L42 36 Z" fill="#5DAA3A"/>
-    <path d="M50 32 L50 25" stroke="#5DAA3A" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M30 38 Q30 35 40 35 L60 35 Q70 35 70 38 Q70 70 50 85 Q30 70 30 38 Z" fill="#FF4757"/>
-    {[[38,48],[50,46],[62,48],[42,58],[58,58],[40,68],[50,66],[60,68],[46,76],[54,76]].map(([x,y],i) => (
-      <ellipse key={i} cx={x} cy={y} rx="1.2" ry="2" fill="#FFD93D"/>
+    {/* 阴影 */}
+    <ellipse cx="52" cy="88" rx="22" ry="3" fill="#000" opacity="0.15"/>
+    {/* 顶部绿叶（多瓣星形）*/}
+    <path d="M50 28 Q42 24 38 30 Q42 36 36 38 Q44 42 38 46 Q48 46 46 38 Q52 42 54 38 Q62 42 56 36 Q62 30 50 28 Z" fill="#5DAA3A"/>
+    <path d="M50 18 Q49 24 50 28" stroke="#3D8825" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    {/* 草莓主体（心形/三角圆顶）*/}
+    <path d="M28 42 Q28 38 38 36 Q50 35 62 36 Q72 38 72 42 Q72 70 50 88 Q28 70 28 42 Z" fill="#FF3344"/>
+    {/* 立体高光 */}
+    <ellipse cx="38" cy="50" rx="5" ry="10" fill="#FF7788" opacity="0.7"/>
+    <ellipse cx="36" cy="46" rx="2" ry="4" fill="#FFFFFF" opacity="0.5"/>
+    {/* 黄色种子（外凸）*/}
+    {[[36,48],[48,46],[60,48],[40,58],[52,56],[64,58],[36,68],[48,66],[60,68],[44,76],[56,76],[50,84]].map(([x,y],i) => (
+      <g key={i}>
+        <ellipse cx={x} cy={y} rx="1.4" ry="2.3" fill="#FFD93D" transform={`rotate(${(i*30) % 360} ${x} ${y})`}/>
+        <ellipse cx={x-0.4} cy={y-0.6} rx="0.5" ry="0.8" fill="#FFFFFF" opacity="0.7" transform={`rotate(${(i*30) % 360} ${x} ${y})`}/>
+      </g>
     ))}
-    <circle cx="44" cy="52" r="2.5" fill="#2C1810"/><circle cx="44.5" cy="51" r="0.7" fill="#fff"/>
-    <circle cx="56" cy="52" r="2.5" fill="#2C1810"/><circle cx="56.5" cy="51" r="0.7" fill="#fff"/>
-    <path d="M46 58 Q50 61 54 58" stroke="#2C1810" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    {/* 表情 - 眼睛 */}
+    <circle cx="44" cy="56" r="3" fill="#1A0F08"/>
+    <circle cx="56" cy="56" r="3" fill="#1A0F08"/>
+    <circle cx="45" cy="54.5" r="1" fill="#fff"/>
+    <circle cx="57" cy="54.5" r="1" fill="#fff"/>
+    {/* 嘴（甜笑）*/}
+    <path d="M44 64 Q50 68 56 64" stroke="#1A0F08" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+    <path d="M46 65 Q50 67 54 65" fill="#FF8FA3" opacity="0.6"/>
+    {/* 脸蛋 */}
+    <ellipse cx="38" cy="62" rx="2.5" ry="2" fill="#FFB7B7" opacity="0.5"/>
+    <ellipse cx="62" cy="62" rx="2.5" ry="2" fill="#FFB7B7" opacity="0.5"/>
   </g>,
 
-  // 🍊 橙子
+  // 🍊 橙子 —— 橘色圆球+叶
   orange: <g>
-    <path d="M48 22 Q52 18 56 22" stroke="#5C3D1F" strokeWidth="2" fill="none" strokeLinecap="round"/>
-    <ellipse cx="55" cy="22" rx="5" ry="3" fill="#5DAA3A"/>
+    {/* 阴影 */}
+    <ellipse cx="52" cy="88" rx="28" ry="3" fill="#000" opacity="0.15"/>
+    {/* 顶部凹陷 + 叶子 */}
+    <path d="M50 30 Q49 24 50 20" stroke="#5C3D1F" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    <path d="M52 22 Q62 18 64 26 Q56 30 50 26 Z" fill="#5DAA3A"/>
+    <path d="M55 24 Q60 22 62 27" stroke="#3D8825" strokeWidth="0.7" fill="none"/>
+    {/* 橙子主体 */}
     <circle cx="50" cy="58" r="30" fill="#FF8C42"/>
-    <circle cx="50" cy="58" r="30" fill="none" stroke="#E67323" strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
-    <ellipse cx="38" cy="48" rx="6" ry="10" fill="#FFA763" opacity="0.6"/>
-    <circle cx="42" cy="56" r="3" fill="#2C1810"/><circle cx="43" cy="54.5" r="1" fill="#fff"/>
-    <circle cx="58" cy="56" r="3" fill="#2C1810"/><circle cx="59" cy="54.5" r="1" fill="#fff"/>
-    <path d="M44 64 Q50 68 56 64" stroke="#2C1810" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 表面纹理（小圆点显示橙皮） */}
+    <circle cx="32" cy="50" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="40" cy="38" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="62" cy="40" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="68" cy="50" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="34" cy="68" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="66" cy="70" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="50" cy="78" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="42" cy="74" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="58" cy="36" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="44" cy="46" r="0.8" fill="#E67323" opacity="0.6"/>
+    <circle cx="56" cy="46" r="0.8" fill="#E67323" opacity="0.6"/>
+    {/* 立体高光 */}
+    <ellipse cx="38" cy="48" rx="7" ry="11" fill="#FFB070" opacity="0.6"/>
+    <ellipse cx="36" cy="44" rx="2.5" ry="4" fill="#FFFFFF" opacity="0.5"/>
+    {/* 顶部凹陷阴影 */}
+    <ellipse cx="50" cy="30" rx="6" ry="2" fill="#C46824" opacity="0.5"/>
+    {/* 表情 - 眼睛 */}
+    <circle cx="42" cy="56" r="3" fill="#1A0F08"/>
+    <circle cx="58" cy="56" r="3" fill="#1A0F08"/>
+    <circle cx="43" cy="54.5" r="1" fill="#fff"/>
+    <circle cx="59" cy="54.5" r="1" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M44 64 Q50 68 56 64" stroke="#1A0F08" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+    <path d="M46 65 Q50 67 54 65" fill="#FF8FA3" opacity="0.6"/>
+    {/* 脸蛋 */}
+    <ellipse cx="32" cy="62" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
+    <ellipse cx="68" cy="62" rx="3" ry="2" fill="#FFB7B7" opacity="0.5"/>
   </g>,
 
   // ═════════════ 交通工具 ═════════════
@@ -769,6 +901,245 @@ const CRITTER_SVG = {
     <circle cx="32" cy="72" r="3" fill="#999"/>
     <circle cx="68" cy="72" r="3" fill="#999"/>
   </g>,
+
+  // ═════════════ 海洋生物 ═════════════
+
+  // 🐋 鲸鱼 —— 蓝色大鲸鱼
+  whale: <g>
+    {/* 阴影 */}
+    <ellipse cx="50" cy="86" rx="32" ry="3" fill="#000" opacity="0.12"/>
+    {/* 身体 */}
+    <ellipse cx="48" cy="55" rx="38" ry="22" fill="#3A8DDE"/>
+    {/* 腹部白色 */}
+    <ellipse cx="48" cy="62" rx="32" ry="14" fill="#E8F4FF"/>
+    {/* 尾巴 */}
+    <path d="M82 55 L96 38 L92 55 L96 72 Z" fill="#3A8DDE"/>
+    <path d="M84 55 L93 42 L91 55 L93 68 Z" fill="#5DA8E8"/>
+    {/* 喷水孔 */}
+    <ellipse cx="35" cy="38" rx="2" ry="1.5" fill="#1A4D6E"/>
+    {/* 喷水柱 */}
+    <path d="M35 35 Q33 25 31 22" stroke="#A8D8F5" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M35 35 Q37 25 39 22" stroke="#A8D8F5" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <circle cx="33" cy="20" r="2" fill="#A8D8F5" opacity="0.7"/>
+    <circle cx="40" cy="20" r="2" fill="#A8D8F5" opacity="0.7"/>
+    {/* 鳍 */}
+    <ellipse cx="50" cy="72" rx="8" ry="4" fill="#2A6FB0"/>
+    {/* 眼睛 */}
+    <circle cx="30" cy="52" r="3.5" fill="#1A0F08"/>
+    <circle cx="31" cy="50.5" r="1.2" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M16 60 Q22 64 30 62" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 脸蛋 */}
+    <ellipse cx="22" cy="58" rx="3" ry="2" fill="#FFB7B7" opacity="0.6"/>
+  </g>,
+
+  // 🐬 海豚 —— 灰色跳跃海豚
+  dolphin: <g>
+    <ellipse cx="50" cy="86" rx="28" ry="3" fill="#000" opacity="0.12"/>
+    {/* 身体（流线型） */}
+    <path d="M15 55 Q15 40 35 35 Q60 30 78 38 Q88 50 85 60 Q80 68 60 70 Q40 72 25 65 Q15 60 15 55 Z" fill="#7B8FA8"/>
+    {/* 腹部 */}
+    <path d="M22 60 Q40 70 65 68 Q78 65 80 58 Q70 64 50 65 Q35 64 22 60 Z" fill="#E8EEF5"/>
+    {/* 背鳍 */}
+    <path d="M48 32 L52 22 L60 35 Z" fill="#5C6F8A"/>
+    {/* 尾巴 */}
+    <path d="M82 50 L96 38 L92 55 L96 70 L82 60 Z" fill="#5C6F8A"/>
+    {/* 嘴（尖喙） */}
+    <path d="M15 55 L8 56 L15 60 Z" fill="#7B8FA8"/>
+    {/* 眼睛 */}
+    <circle cx="32" cy="48" r="3" fill="#1A0F08"/>
+    <circle cx="33" cy="47" r="1" fill="#fff"/>
+    {/* 嘴笑 */}
+    <path d="M14 58 Q19 60 24 58" stroke="#1A0F08" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+    {/* 鳍 */}
+    <ellipse cx="50" cy="68" rx="6" ry="3" fill="#5C6F8A"/>
+  </g>,
+
+  // 🐙 章鱼 —— 紫色八爪章鱼
+  octopus: <g>
+    <ellipse cx="50" cy="92" rx="32" ry="3" fill="#000" opacity="0.12"/>
+    {/* 触手（8 条波浪）*/}
+    <path d="M22 60 Q14 68 16 80 Q18 88 24 86 Q26 78 24 70 Z" fill="#A05DBE"/>
+    <path d="M30 65 Q24 78 26 90 Q32 92 34 84 Q34 75 32 68 Z" fill="#8E4DA8"/>
+    <path d="M40 68 Q36 82 38 92 Q44 92 44 85 Q44 76 42 70 Z" fill="#A05DBE"/>
+    <path d="M50 68 Q48 82 50 92 Q52 92 52 85 Q52 76 51 70 Z" fill="#8E4DA8"/>
+    <path d="M60 68 Q58 82 60 92 Q66 92 64 84 Q62 76 62 70 Z" fill="#A05DBE"/>
+    <path d="M70 65 Q72 78 70 90 Q66 92 64 84 Q66 75 67 68 Z" fill="#8E4DA8"/>
+    <path d="M78 60 Q86 68 84 80 Q82 88 76 86 Q74 78 76 70 Z" fill="#A05DBE"/>
+    {/* 头部 */}
+    <ellipse cx="50" cy="48" rx="32" ry="26" fill="#B670D2"/>
+    {/* 头顶高光 */}
+    <ellipse cx="40" cy="36" rx="10" ry="6" fill="#D8A0F0" opacity="0.6"/>
+    {/* 吸盘点缀（小圆）*/}
+    <circle cx="22" cy="74" r="1.5" fill="#FFC0E0" opacity="0.7"/>
+    <circle cx="30" cy="78" r="1.5" fill="#FFC0E0" opacity="0.7"/>
+    <circle cx="50" cy="80" r="1.5" fill="#FFC0E0" opacity="0.7"/>
+    <circle cx="68" cy="78" r="1.5" fill="#FFC0E0" opacity="0.7"/>
+    <circle cx="76" cy="74" r="1.5" fill="#FFC0E0" opacity="0.7"/>
+    {/* 大眼睛 */}
+    <circle cx="40" cy="48" r="6" fill="#fff"/>
+    <circle cx="60" cy="48" r="6" fill="#fff"/>
+    <circle cx="40" cy="49" r="3.5" fill="#1A0F08"/>
+    <circle cx="60" cy="49" r="3.5" fill="#1A0F08"/>
+    <circle cx="41" cy="47.5" r="1.3" fill="#fff"/>
+    <circle cx="61" cy="47.5" r="1.3" fill="#fff"/>
+    {/* 嘴 */}
+    <ellipse cx="50" cy="60" rx="3" ry="2" fill="#1A0F08"/>
+    {/* 脸蛋 */}
+    <ellipse cx="32" cy="55" rx="3" ry="2" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="68" cy="55" rx="3" ry="2" fill="#FF8FA3" opacity="0.5"/>
+  </g>,
+
+  // 🦀 螃蟹 —— 红色大钳螃蟹
+  crab: <g>
+    <ellipse cx="50" cy="86" rx="34" ry="3" fill="#000" opacity="0.12"/>
+    {/* 身体 */}
+    <ellipse cx="50" cy="58" rx="28" ry="20" fill="#E63946"/>
+    {/* 高光 */}
+    <ellipse cx="42" cy="50" rx="10" ry="5" fill="#FF7788" opacity="0.6"/>
+    {/* 大钳子（左） */}
+    <ellipse cx="14" cy="48" rx="10" ry="8" fill="#E63946" transform="rotate(-25 14 48)"/>
+    <path d="M8 44 L4 40 L8 50 Z" fill="#E63946"/>
+    <path d="M12 50 L6 54 L18 52 Z" fill="#C42835"/>
+    {/* 大钳子（右） */}
+    <ellipse cx="86" cy="48" rx="10" ry="8" fill="#E63946" transform="rotate(25 86 48)"/>
+    <path d="M92 44 L96 40 L92 50 Z" fill="#E63946"/>
+    <path d="M88 50 L94 54 L82 52 Z" fill="#C42835"/>
+    {/* 钳臂 */}
+    <line x1="20" y1="55" x2="28" y2="55" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="80" y1="55" x2="72" y2="55" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    {/* 6 条腿 */}
+    <line x1="32" y1="68" x2="22" y2="78" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="40" y1="72" x2="36" y2="84" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="48" y1="74" x2="48" y2="86" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="56" y1="74" x2="56" y2="86" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="64" y1="72" x2="68" y2="84" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    <line x1="68" y1="68" x2="78" y2="78" stroke="#C42835" strokeWidth="3" strokeLinecap="round"/>
+    {/* 眼柄 */}
+    <line x1="42" y1="44" x2="40" y2="36" stroke="#C42835" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="58" y1="44" x2="60" y2="36" stroke="#C42835" strokeWidth="2" strokeLinecap="round"/>
+    {/* 眼睛在眼柄上 */}
+    <circle cx="40" cy="34" r="3" fill="#fff" stroke="#1A0F08" strokeWidth="0.8"/>
+    <circle cx="60" cy="34" r="3" fill="#fff" stroke="#1A0F08" strokeWidth="0.8"/>
+    <circle cx="40" cy="34" r="1.5" fill="#1A0F08"/>
+    <circle cx="60" cy="34" r="1.5" fill="#1A0F08"/>
+    {/* 嘴 */}
+    <ellipse cx="50" cy="62" rx="6" ry="3" fill="#1A0F08"/>
+    <path d="M46 62 L48 58 M50 62 L50 58 M54 62 L52 58" stroke="#fff" strokeWidth="0.8"/>
+  </g>,
+
+  // ⭐ 海星
+  starfish: <g>
+    <ellipse cx="50" cy="86" rx="28" ry="3" fill="#000" opacity="0.12"/>
+    {/* 五角星海星 */}
+    <path d="M50 18 L60 42 L86 44 L66 60 L74 84 L50 70 L26 84 L34 60 L14 44 L40 42 Z"
+      fill="#FFB562" stroke="#E08838" strokeWidth="1.5" strokeLinejoin="round"/>
+    {/* 高光 */}
+    <path d="M50 22 L57 42 L75 44 L62 56 L42 50 L40 42 L43 36 Z" fill="#FFD9A8" opacity="0.7"/>
+    {/* 表面装饰圆点 */}
+    <circle cx="50" cy="35" r="2" fill="#E08838"/>
+    <circle cx="38" cy="48" r="1.5" fill="#E08838"/>
+    <circle cx="62" cy="48" r="1.5" fill="#E08838"/>
+    <circle cx="44" cy="65" r="1.5" fill="#E08838"/>
+    <circle cx="56" cy="65" r="1.5" fill="#E08838"/>
+    {/* 眼睛 */}
+    <circle cx="44" cy="50" r="2.5" fill="#1A0F08"/>
+    <circle cx="56" cy="50" r="2.5" fill="#1A0F08"/>
+    <circle cx="44.5" cy="49" r="0.9" fill="#fff"/>
+    <circle cx="56.5" cy="49" r="0.9" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M46 58 Q50 61 54 58" stroke="#1A0F08" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    {/* 脸蛋 */}
+    <ellipse cx="38" cy="56" rx="2.5" ry="1.5" fill="#FF8FA3" opacity="0.6"/>
+    <ellipse cx="62" cy="56" rx="2.5" ry="1.5" fill="#FF8FA3" opacity="0.6"/>
+  </g>,
+
+  // 🦈 鲨鱼 —— 灰蓝鲨鱼（友善版）
+  shark: <g>
+    <ellipse cx="50" cy="86" rx="32" ry="3" fill="#000" opacity="0.12"/>
+    {/* 身体 */}
+    <path d="M14 55 Q14 40 35 35 Q60 30 80 40 Q90 50 86 62 Q78 70 60 72 Q40 74 22 68 Q14 62 14 55 Z" fill="#5C7A99"/>
+    {/* 腹部白色 */}
+    <path d="M20 60 Q40 72 65 70 Q80 66 82 58 Q70 66 50 67 Q32 65 20 60 Z" fill="#E8EEF5"/>
+    {/* 背鳍（典型鲨鱼三角）*/}
+    <path d="M44 32 L52 18 L62 36 Z" fill="#3D5A80"/>
+    <path d="M46 32 L52 22 L60 36 Z" fill="#5C7A99"/>
+    {/* 尾鳍 */}
+    <path d="M82 50 L96 32 L94 55 L96 78 L82 62 Z" fill="#3D5A80"/>
+    {/* 鳃 */}
+    <path d="M28 50 Q26 55 28 60" stroke="#3D5A80" strokeWidth="1.5" fill="none"/>
+    <path d="M32 50 Q30 55 32 60" stroke="#3D5A80" strokeWidth="1.5" fill="none"/>
+    <path d="M36 50 Q34 55 36 60" stroke="#3D5A80" strokeWidth="1.5" fill="none"/>
+    {/* 嘴 + 牙齿（卡通版，友善）*/}
+    <path d="M14 58 L26 60 L20 64 L14 60 Z" fill="#1A0F08" opacity="0.8"/>
+    <polygon points="16,60 17,62 18,60" fill="#fff"/>
+    <polygon points="20,60 21,63 22,60" fill="#fff"/>
+    <polygon points="22,61 23,63 24,61" fill="#fff"/>
+    {/* 眼睛 */}
+    <circle cx="34" cy="46" r="3.5" fill="#fff"/>
+    <circle cx="34" cy="47" r="2" fill="#1A0F08"/>
+    <circle cx="34.5" cy="46" r="0.8" fill="#fff"/>
+    {/* 鳍 */}
+    <path d="M50 66 Q56 76 60 70 Z" fill="#3D5A80"/>
+  </g>,
+
+  // 🪼 水母 —— 透明粉水母
+  jellyfish: <g>
+    <ellipse cx="50" cy="92" rx="22" ry="3" fill="#000" opacity="0.1"/>
+    {/* 触须（飘动）*/}
+    <path d="M30 56 Q28 70 32 84 Q34 90 32 92" stroke="#FFB7D5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M40 60 Q38 76 42 88 Q44 92 42 92" stroke="#FF8FB5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M50 60 Q50 76 50 90 Q50 94 50 92" stroke="#FFB7D5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M60 60 Q62 76 58 88 Q56 92 58 92" stroke="#FF8FB5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <path d="M70 56 Q72 70 68 84 Q66 90 68 92" stroke="#FFB7D5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"/>
+    {/* 伞盖（半圆）*/}
+    <path d="M20 56 Q20 28 50 26 Q80 28 80 56 Q50 60 20 56 Z" fill="#FFB7D5" opacity="0.85"/>
+    {/* 内层 */}
+    <ellipse cx="50" cy="42" rx="22" ry="14" fill="#FFD9E8" opacity="0.7"/>
+    {/* 高光 */}
+    <ellipse cx="40" cy="34" rx="8" ry="4" fill="#FFFFFF" opacity="0.5"/>
+    <ellipse cx="38" cy="32" rx="3" ry="2" fill="#FFFFFF" opacity="0.8"/>
+    {/* 内部小点 */}
+    <circle cx="35" cy="48" r="2" fill="#FF8FB5" opacity="0.6"/>
+    <circle cx="65" cy="48" r="2" fill="#FF8FB5" opacity="0.6"/>
+    {/* 眼睛 */}
+    <circle cx="42" cy="42" r="2.5" fill="#1A0F08"/>
+    <circle cx="58" cy="42" r="2.5" fill="#1A0F08"/>
+    <circle cx="42.5" cy="41" r="0.8" fill="#fff"/>
+    <circle cx="58.5" cy="41" r="0.8" fill="#fff"/>
+    {/* 嘴 */}
+    <path d="M46 50 Q50 53 54 50" stroke="#1A0F08" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+  </g>,
+
+  // 🐟 小鱼 —— 黄红色热带鱼
+  fish: <g>
+    <ellipse cx="50" cy="86" rx="26" ry="3" fill="#000" opacity="0.12"/>
+    {/* 身体 */}
+    <ellipse cx="42" cy="55" rx="28" ry="18" fill="#FFB562"/>
+    {/* 条纹 */}
+    <path d="M30 40 Q30 55 30 70" stroke="#E08838" strokeWidth="2.5" fill="none" opacity="0.7"/>
+    <path d="M42 38 Q42 55 42 72" stroke="#E08838" strokeWidth="2.5" fill="none" opacity="0.7"/>
+    <path d="M55 40 Q55 55 55 70" stroke="#E08838" strokeWidth="2.5" fill="none" opacity="0.7"/>
+    {/* 腹部高光 */}
+    <ellipse cx="42" cy="64" rx="20" ry="6" fill="#FFD9A8" opacity="0.5"/>
+    {/* 尾巴 */}
+    <path d="M68 55 L88 35 L82 55 L88 75 Z" fill="#FF6B6B"/>
+    <path d="M70 55 L84 42 L80 55 L84 68 Z" fill="#FF8FA3"/>
+    {/* 背鳍 */}
+    <path d="M42 38 L46 26 L52 38 Z" fill="#FF6B6B"/>
+    {/* 腹鳍 */}
+    <path d="M40 70 L44 80 L48 72 Z" fill="#FF6B6B"/>
+    {/* 鳃 */}
+    <path d="M22 50 Q20 55 22 60" stroke="#E08838" strokeWidth="1.5" fill="none"/>
+    {/* 嘴 */}
+    <path d="M14 55 L18 56 L14 58 Z" fill="#FF6B6B"/>
+    {/* 眼睛（大）*/}
+    <circle cx="26" cy="48" r="5" fill="#fff"/>
+    <circle cx="26" cy="49" r="3" fill="#1A0F08"/>
+    <circle cx="27" cy="48" r="1.2" fill="#fff"/>
+    {/* 脸蛋 */}
+    <ellipse cx="32" cy="60" rx="3" ry="2" fill="#FF8FA3" opacity="0.7"/>
+  </g>,
 };
 
 
@@ -861,19 +1232,35 @@ const ISLANDS = [
     ],
   },
   {
-    id: 'mystery',
-    name: '神秘岛',
-    emoji: '❓',
-    color: 'purple',
-    bgFrom: '#B8A4DD',
-    bgTo: '#7C68C2',
+    id: 'ocean',
+    name: '海洋岛',
+    emoji: '🌊',
+    color: 'cyan',
+    bgFrom: '#A8E6F0',
+    bgTo: '#3D8FBE',
     unlocked: false,
-    unlockHint: '集齐 20 张图鉴解锁',
-    description: '???',
-    npc: '🌟',
-    npcName: '???',
-    items: [],
-    levels: [],
+    unlockHint: '集齐 22 张图鉴解锁',
+    description: '神秘的海底世界',
+    npc: '🐋',
+    npcName: '鲸鱼船长',
+    items: [
+      { id: 'whale', emoji: '🐋', name: '鲸鱼', sound: '呼噜噜', shadow: '🐋' },
+      { id: 'dolphin', emoji: '🐬', name: '海豚', sound: '吱吱吱', shadow: '🐬' },
+      { id: 'octopus', emoji: '🐙', name: '章鱼', sound: '咕嘟咕嘟', shadow: '🐙' },
+      { id: 'crab', emoji: '🦀', name: '螃蟹', sound: '咔嗒咔嗒', shadow: '🦀' },
+      { id: 'starfish', emoji: '⭐', name: '海星', sound: '海星海星', shadow: '⭐' },
+      { id: 'shark', emoji: '🦈', name: '鲨鱼', sound: '哗啦哗啦', shadow: '🦈' },
+      { id: 'jellyfish', emoji: '🪼', name: '水母', sound: '飘呀飘呀', shadow: '🪼' },
+      { id: 'fish', emoji: '🐟', name: '小鱼', sound: '咕噜咕噜', shadow: '🐟' },
+    ],
+    levels: [
+      { id: 1, name: '认识海洋', type: 'recognize', pool: ['whale', 'dolphin', 'fish'] },
+      { id: 2, name: '找一找', type: 'find', pool: ['octopus', 'crab', 'starfish', 'shark'] },
+      { id: 3, name: '听声音', type: 'sound', pool: ['whale', 'dolphin', 'crab', 'shark'] },
+      { id: 4, name: '影子谜语', type: 'shadow', pool: ['octopus', 'jellyfish', 'fish', 'starfish'] },
+      { id: 5, name: '数一数', type: 'count', pool: ['fish', 'crab', 'starfish'] },
+      { id: 6, name: '海洋派对', type: 'mixed', pool: ['whale', 'dolphin', 'octopus', 'jellyfish'] },
+    ],
   },
 ];
 
@@ -904,6 +1291,15 @@ const FACTS = {
   bus: '公交车是大家一起坐的车，一路上停很多站接送大家～',
   fire_truck: '消防车是英雄哦！着火了它能喷水把火扑灭！',
   police_car: '警车是保护大家的，开着警灯抓坏人～',
+  // 海洋生物
+  whale: '鲸鱼是世界上最大的动物哦！它会从头顶喷水玩。',
+  dolphin: '海豚特别聪明，喜欢和人类做朋友，还会跳出水面玩耍～',
+  octopus: '章鱼有 8 条腿，会变颜色躲起来，是海里的小魔术师！',
+  crab: '螃蟹横着走路，两只大钳子能夹东西，可厉害啦～',
+  starfish: '海星有 5 条手臂，掉了还能长出来，超级神奇！',
+  shark: '鲨鱼是海里的大力士，牙齿掉了会一直长新的哦～',
+  jellyfish: '水母身体软软的像果冻，会一鼓一鼓地游泳～',
+  fish: '小鱼用鳃呼吸，鳞片像彩虹一样亮闪闪的～',
 };
 
 // 根据已收集数量返回伙伴台词
@@ -961,8 +1357,8 @@ const ACCESSORIES = [
   // —— 帽子类 ——
   {
     id: 'crown', name: '小王冠', emoji: '👑', slot: 'hat',
-    unlock: { type: 'collected', count: 22 },
-    desc: '集齐全部图鉴',
+    unlock: { type: 'collected', count: 30 },
+    desc: '集齐全部 30 张图鉴',
     svg: <g>
       <path d="M30 -10 L40 -25 L50 -15 L60 -25 L70 -10 Z" fill="#FFD93D" stroke="#FFA94D" strokeWidth="1.5"/>
       <circle cx="40" cy="-22" r="3" fill="#FF6B6B"/>
@@ -1057,14 +1453,19 @@ const ACHIEVEMENTS = [
     check: (s) => s.collected.length >= 5 },
   { id: 'dex_10', name: '收藏专家', icon: '📖', desc: '收集 10 张图鉴', tier: 2,
     check: (s) => s.collected.length >= 10 },
-  { id: 'dex_all', name: '百科小达人', icon: '🏆', desc: '集齐全部 22 张图鉴', tier: 3, reward: 30,
-    check: (s) => s.collected.length >= 22 },
+  { id: 'dex_all', name: '百科小达人', icon: '🏆', desc: '集齐全部 30 张图鉴', tier: 3, reward: 50,
+    check: (s) => s.collected.length >= 30 },
 
   // 星星类
   { id: 'first_perfect', name: '完美主义者', icon: '💎', desc: '一关全对获得 3 星', tier: 2,
     check: (s) => Object.values(s.progress).some(p => Object.values(p.stars || {}).some(x => x === 3)) },
   { id: 'island_clear', name: '征服动物岛', icon: '🐾', desc: '动物岛 6 关全部满星', tier: 2, reward: 15,
     check: (s) => Object.values(s.progress.animals?.stars || {}).every(x => x === 3) },
+  { id: 'ocean_clear', name: '征服海洋岛', icon: '🌊', desc: '海洋岛 6 关全部满星', tier: 3, reward: 25,
+    check: (s) => {
+      const stars = Object.values(s.progress.ocean?.stars || {});
+      return stars.length === 6 && stars.every(x => x === 3);
+    } },
 
   // 伙伴类
   { id: 'companion_picked', name: '我的好朋友', icon: '💗', desc: '选定一位伙伴', tier: 1,
@@ -1121,8 +1522,8 @@ const isIslandUnlocked = (island, state) => {
     const animalsCompleted = Object.values(state.progress.animals?.stars || {}).filter(s => s > 0).length;
     return animalsCompleted >= 3;
   }
-  if (island.id === 'mystery') {
-    return state.collected.length >= 14;
+  if (island.id === 'ocean') {
+    return state.collected.length >= 22;
   }
   return false;
 };
@@ -1433,6 +1834,10 @@ const loadState = () => {
       if (!merged.progress.transport) {
         merged.progress = { ...merged.progress, transport: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } } };
       }
+      // 补齐 ocean progress
+      if (!merged.progress.ocean) {
+        merged.progress = { ...merged.progress, ocean: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } } };
+      }
       return merged;
     }
   } catch(e) {}
@@ -1441,6 +1846,7 @@ const loadState = () => {
       animals: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
       fruits: { stars: { 1: 0, 2: 0, 3: 0, 4: 0 } },
       transport: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
+      ocean: { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
     },
     collected: [],
     berries: 0,
@@ -1593,9 +1999,9 @@ const HomeScreen = ({ state, onIslandClick, onParentMode, onOpenDex, onOpenCompa
               <span className="text-3xl">📖</span>
               <div className="text-left">
                 <div className="font-bold text-amber-800">我的图鉴</div>
-                <div className="text-xs text-amber-700">已收集 {totalCollected}/22</div>
+                <div className="text-xs text-amber-700">已收集 {totalCollected}/30</div>
                 <div className="mt-1 h-1.5 bg-white/70 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-400 rounded-full" style={{ width: `${(totalCollected/22)*100}%` }}/>
+                  <div className="h-full bg-orange-400 rounded-full" style={{ width: `${(totalCollected/30)*100}%` }}/>
                 </div>
               </div>
             </div>
@@ -1871,9 +2277,19 @@ const LevelScreen = ({ island, level, onBack, onComplete }) => {
   const q = questions[qIdx];
   const progress = ((qIdx) / questions.length) * 100;
 
+  // 关卡刚进入时朗读关卡名（只触发一次）
+  const [introDone, setIntroDone] = useState(false);
+  useEffect(() => {
+    // 朗读关卡名："认识朋友"、"听一听"、"找一找" 等
+    speak(level.name);
+    // 关卡名朗读完后才让题目朗读开始（约 1.4 秒留给 4 字关卡名 + 缓冲）
+    const t = setTimeout(() => setIntroDone(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
+
   // 进入题目时自动朗读
   useEffect(() => {
-    if (!q) return;
+    if (!q || !introDone) return;
     setFeedback(null);
     setIdleHint(false);
     const timer = setTimeout(() => {
@@ -1887,7 +2303,7 @@ const LevelScreen = ({ island, level, onBack, onComplete }) => {
       setIdleHint(true);
     }, 5500);
     return () => { clearTimeout(timer); clearTimeout(idleTimer); };
-  }, [qIdx]);
+  }, [qIdx, introDone]);
 
   if (!q) return null;
 
@@ -2236,6 +2652,7 @@ const DexScreen = ({ state, onClose }) => {
           { id: 'animals', label: '动物', emoji: '🐾' },
           { id: 'fruits', label: '水果', emoji: '🍎' },
           { id: 'transport', label: '交通', emoji: '🚗' },
+          { id: 'ocean', label: '海洋', emoji: '🌊' },
         ].map(tab => (
           <button key={tab.id} onClick={() => { sound.play('click'); setFilter(tab.id); }}
             className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition btn-press
@@ -3278,16 +3695,12 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => {
         console.log('✅ 离线模式已启用');
-        // 检测新版本：每 30 分钟检查一次
         setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
-
-        // 新版本下载好了
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (!newWorker) return;
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // 老版本仍在控制：通知新版本立即接管
               console.log('🔄 检测到新版本，正在更新…');
               newWorker.postMessage('SKIP_WAITING');
             }
@@ -3295,13 +3708,10 @@ if ('serviceWorker' in navigator) {
         });
       })
       .catch(err => console.warn('SW 注册失败:', err));
-
-    // 新 SW 激活后自动刷新（一次）
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (refreshing) return;
       refreshing = true;
-      console.log('🔄 已更新到新版本');
       window.location.reload();
     });
   });
